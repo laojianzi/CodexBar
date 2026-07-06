@@ -3,8 +3,8 @@ import Foundation
 import Testing
 @testable import CodexBar
 
-@available(macOS 13.0, *)
-struct PlanUtilizationHistoryChartMenuViewTests {
+@MainActor
+struct LegacyPlanUtilizationHistoryMenuViewTests {
     @Test
     func `merged entries preserve first occurrence order while removing duplicates`() {
         let first = PlanUtilizationHistoryEntry(
@@ -16,7 +16,7 @@ struct PlanUtilizationHistoryChartMenuViewTests {
             usedPercent: 20,
             resetsAt: nil)
 
-        let merged = PlanUtilizationHistoryChartMenuView.mergedEntries([
+        let merged = LegacyPlanUtilizationHistoryMenuView.mergedEntries([
             first,
             second,
             first,
@@ -42,7 +42,7 @@ struct PlanUtilizationHistoryChartMenuViewTests {
             secondary: nil,
             updatedAt: Date(timeIntervalSince1970: 1_700_000_000))
 
-        let model = PlanUtilizationHistoryChartMenuView._modelSnapshotForTesting(
+        let model = LegacyPlanUtilizationHistoryMenuView._modelSnapshotForTesting(
             histories: [history],
             provider: .zai,
             snapshot: snapshot)
@@ -52,38 +52,28 @@ struct PlanUtilizationHistoryChartMenuViewTests {
     }
 
     @Test
-    func `generic unknown weekly extra window does not filter saved history`() {
+    func `missing periods render as unobserved zero utilization bars`() {
+        let firstReset = Date(timeIntervalSince1970: 1_700_000_000)
         let history = PlanUtilizationSeriesHistory(
             name: .weekly,
             windowMinutes: 10080,
             entries: [
                 PlanUtilizationHistoryEntry(
-                    capturedAt: Date(timeIntervalSince1970: 1_700_000_000),
-                    usedPercent: 42,
-                    resetsAt: nil),
+                    capturedAt: firstReset.addingTimeInterval(-60),
+                    usedPercent: 80,
+                    resetsAt: firstReset),
+                PlanUtilizationHistoryEntry(
+                    capturedAt: firstReset.addingTimeInterval(14 * 24 * 60 * 60 - 60),
+                    usedPercent: 30,
+                    resetsAt: firstReset.addingTimeInterval(14 * 24 * 60 * 60)),
             ])
-        let snapshot = UsageSnapshot(
-            primary: nil,
-            secondary: nil,
-            extraRateWindows: [
-                NamedRateWindow(
-                    id: "weekly-reset-only",
-                    title: "Weekly reset",
-                    window: RateWindow(
-                        usedPercent: 0,
-                        windowMinutes: 10080,
-                        resetsAt: Date(timeIntervalSince1970: 1_700_003_600),
-                        resetDescription: nil),
-                    usageKnown: false),
-            ],
-            updatedAt: Date(timeIntervalSince1970: 1_700_000_000))
 
-        let model = PlanUtilizationHistoryChartMenuView._modelSnapshotForTesting(
+        let model = LegacyPlanUtilizationHistoryMenuView._modelSnapshotForTesting(
             histories: [history],
-            provider: .zed,
-            snapshot: snapshot)
+            provider: .codex,
+            referenceDate: firstReset.addingTimeInterval(14 * 24 * 60 * 60))
 
-        #expect(model.visibleSeries == ["weekly:10080"])
-        #expect(model.selectedSeries == "weekly:10080")
+        #expect(model.usedPercents == [80, 0, 30])
+        #expect(model.observedFlags == [true, false, true])
     }
 }

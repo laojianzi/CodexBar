@@ -1,7 +1,7 @@
 import AppKit
 import CodexBarCore
+import Combine
 import Foundation
-import Observation
 import SweetCookieKit
 
 // MARK: - Observation helpers
@@ -54,21 +54,21 @@ extension UsageStore {
     }
 
     func observeSettingsChanges() {
-        withObservationTracking {
-            _ = self.backgroundWorkSettingsObservationToken
-        } onChange: { [weak self] in
+        self.settingsChangeCancellable = self.settings.objectWillChange.sink { [weak self] _ in
             Task { @MainActor [weak self] in
-                guard let self else { return }
-                self.observeSettingsChanges()
-                self.invalidateProviderAvailabilityCache()
-                self.probeLogs = [:]
-                guard self.startupBehavior.automaticallyStartsBackgroundWork else { return }
-                self.startTimer()
-                self.updateProviderRuntimes()
-                await self.refreshHistoricalDatasetIfNeeded()
-                await self.refreshForSettingsChange()
+                await self?.handleObservedSettingsChange()
             }
         }
+    }
+
+    private func handleObservedSettingsChange() async {
+        self.invalidateProviderAvailabilityCache()
+        self.probeLogs = [:]
+        guard self.startupBehavior.automaticallyStartsBackgroundWork else { return }
+        self.startTimer()
+        self.updateProviderRuntimes()
+        await self.refreshHistoricalDatasetIfNeeded()
+        await self.refreshForSettingsChange()
     }
 
     var backgroundWorkSettingsObservationToken: Int {
@@ -105,8 +105,7 @@ extension UsageStore {
 }
 
 @MainActor
-@Observable
-final class UsageStore {
+final class UsageStore: ObservableObject {
     private struct ProviderAvailabilityCacheEntry {
         let available: Bool
         let configRevision: Int
@@ -133,148 +132,149 @@ final class UsageStore {
         case dashboardWeb
     }
 
-    var snapshots: [UsageProvider: UsageSnapshot] = [:]
-    var errors: [UsageProvider: String] = [:]
-    var knownLimitsAvailabilityByProvider: [UsageProvider: UsageLimitsAvailability] = [:]
-    var lastSourceLabels: [UsageProvider: String] = [:]
-    var lastFetchAttempts: [UsageProvider: [ProviderFetchAttempt]] = [:]
-    var accountSnapshots: [UsageProvider: [TokenAccountUsageSnapshot]] = [:]
-    var codexAccountSnapshots: [CodexAccountUsageSnapshot] = []
-    var kiloScopeSnapshots: [KiloScopeSnapshot] = []
-    var tokenSnapshots: [UsageProvider: CostUsageTokenSnapshot] = [:]
-    var tokenErrors: [UsageProvider: String] = [:]
-    var tokenRefreshInFlight: Set<UsageProvider> = []
-    var credits: CreditsSnapshot?
-    var lastCreditsError: String?
-    var openAIDashboard: OpenAIDashboardSnapshot?
-    var lastOpenAIDashboardError: String?
-    var openAIDashboardRequiresLogin: Bool = false
-    var openAIDashboardCookieImportStatus: String?
-    var openAIDashboardCookieImportDebugLog: String?
-    var versions: [UsageProvider: String] = [:]
-    var isRefreshing = false
-    var refreshingProviders: Set<UsageProvider> = []
-    var debugForceAnimation = false
-    var pathDebugInfo: PathDebugSnapshot = .empty
-    var statuses: [UsageProvider: ProviderStatus] = [:]
-    var statusComponents: [UsageProvider: [ProviderStatusComponent]] = [:]
-    var probeLogs: [UsageProvider: String] = [:]
-    var historicalPaceRevision: Int = 0
-    var planUtilizationHistoryRevision: Int = 0
-    var providerStorageFootprints: [UsageProvider: ProviderStorageFootprint] = [:]
-    @ObservationIgnored var lastCreditsSnapshot: CreditsSnapshot?
-    @ObservationIgnored var lastCreditsSnapshotAccountKey: String?
-    @ObservationIgnored var lastCreditsSource: CodexCreditsSource = .none
-    @ObservationIgnored var creditsFailureStreak: Int = 0
-    @ObservationIgnored var openAIDashboardAttachmentAuthorized: Bool = false {
+    @Published var snapshots: [UsageProvider: UsageSnapshot] = [:]
+    @Published var errors: [UsageProvider: String] = [:]
+    @Published var knownLimitsAvailabilityByProvider: [UsageProvider: UsageLimitsAvailability] = [:]
+    @Published var lastSourceLabels: [UsageProvider: String] = [:]
+    @Published var lastFetchAttempts: [UsageProvider: [ProviderFetchAttempt]] = [:]
+    @Published var accountSnapshots: [UsageProvider: [TokenAccountUsageSnapshot]] = [:]
+    @Published var codexAccountSnapshots: [CodexAccountUsageSnapshot] = []
+    @Published var kiloScopeSnapshots: [KiloScopeSnapshot] = []
+    @Published var tokenSnapshots: [UsageProvider: CostUsageTokenSnapshot] = [:]
+    @Published var tokenErrors: [UsageProvider: String] = [:]
+    @Published var tokenRefreshInFlight: Set<UsageProvider> = []
+    @Published var credits: CreditsSnapshot?
+    @Published var lastCreditsError: String?
+    @Published var openAIDashboard: OpenAIDashboardSnapshot?
+    @Published var lastOpenAIDashboardError: String?
+    @Published var openAIDashboardRequiresLogin: Bool = false
+    @Published var openAIDashboardCookieImportStatus: String?
+    @Published var openAIDashboardCookieImportDebugLog: String?
+    @Published var versions: [UsageProvider: String] = [:]
+    @Published var isRefreshing = false
+    @Published var refreshingProviders: Set<UsageProvider> = []
+    @Published var debugForceAnimation = false
+    @Published var pathDebugInfo: PathDebugSnapshot = .empty
+    @Published var statuses: [UsageProvider: ProviderStatus] = [:]
+    @Published var statusComponents: [UsageProvider: [ProviderStatusComponent]] = [:]
+    @Published var probeLogs: [UsageProvider: String] = [:]
+    @Published var historicalPaceRevision: Int = 0
+    @Published var planUtilizationHistoryRevision: Int = 0
+    @Published var providerStorageFootprints: [UsageProvider: ProviderStorageFootprint] = [:]
+    var lastCreditsSnapshot: CreditsSnapshot?
+    var lastCreditsSnapshotAccountKey: String?
+    var lastCreditsSource: CodexCreditsSource = .none
+    var creditsFailureStreak: Int = 0
+    var openAIDashboardAttachmentAuthorized: Bool = false {
         didSet {
             guard self.openAIDashboardAttachmentAuthorized != oldValue else { return }
             self.openAIDashboardAttachmentRevision &+= 1
         }
     }
 
-    var openAIDashboardAttachmentRevision = 0
-    @ObservationIgnored var lastOpenAIDashboardSnapshot: OpenAIDashboardSnapshot?
-    @ObservationIgnored var lastOpenAIDashboardAttachmentAuthorized: Bool = false
-    @ObservationIgnored var lastOpenAIDashboardTargetEmail: String?
-    @ObservationIgnored var lastOpenAIDashboardTargetIsolationKey: String?
-    @ObservationIgnored var lastOpenAIDashboardAttemptAt: Date?
-    @ObservationIgnored var lastOpenAIDashboardCookieImportAttemptAt: Date?
-    @ObservationIgnored var lastOpenAIDashboardCookieImportEmail: String?
-    @ObservationIgnored var lastCodexAccountScopedRefreshGuard: CodexAccountScopedRefreshGuard?
-    @ObservationIgnored var lastKnownLiveSystemCodexEmail: String?
-    @ObservationIgnored var openAIWebAccountDidChange: Bool = false
-    @ObservationIgnored var creditsRefreshTask: Task<Void, Never>?
-    @ObservationIgnored var creditsRefreshTaskKey: String?
-    @ObservationIgnored var openAIDashboardBackgroundRefreshTask: Task<Void, Never>?
-    @ObservationIgnored var openAIDashboardBackgroundRefreshTaskKey: String?
-    @ObservationIgnored var openAIDashboardRefreshTask: Task<Void, Never>?
-    @ObservationIgnored var openAIDashboardRefreshTaskKey: String?
-    @ObservationIgnored var openAIDashboardRefreshTaskToken: UUID?
-    @ObservationIgnored var _test_openAIDashboardCookieImportOverride: (@MainActor (
+    @Published var openAIDashboardAttachmentRevision = 0
+    var lastOpenAIDashboardSnapshot: OpenAIDashboardSnapshot?
+    var lastOpenAIDashboardAttachmentAuthorized: Bool = false
+    var lastOpenAIDashboardTargetEmail: String?
+    var lastOpenAIDashboardTargetIsolationKey: String?
+    var lastOpenAIDashboardAttemptAt: Date?
+    var lastOpenAIDashboardCookieImportAttemptAt: Date?
+    var lastOpenAIDashboardCookieImportEmail: String?
+    var lastCodexAccountScopedRefreshGuard: CodexAccountScopedRefreshGuard?
+    var lastKnownLiveSystemCodexEmail: String?
+    var openAIWebAccountDidChange: Bool = false
+    var creditsRefreshTask: Task<Void, Never>?
+    var creditsRefreshTaskKey: String?
+    var openAIDashboardBackgroundRefreshTask: Task<Void, Never>?
+    var openAIDashboardBackgroundRefreshTaskKey: String?
+    var openAIDashboardRefreshTask: Task<Void, Never>?
+    var openAIDashboardRefreshTaskKey: String?
+    var openAIDashboardRefreshTaskToken: UUID?
+    var _test_openAIDashboardCookieImportOverride: (@MainActor (
         String?,
         Bool,
         ProviderCookieSource,
         CookieHeaderCache.Scope?,
         @escaping (String) -> Void) async throws -> OpenAIDashboardBrowserCookieImporter.ImportResult)?
-    @ObservationIgnored var _test_openAIDashboardLoaderOverride: (@MainActor (
+    var _test_openAIDashboardLoaderOverride: (@MainActor (
         String?,
         @escaping (String) -> Void,
         Bool,
         TimeInterval) async throws -> OpenAIDashboardSnapshot)?
-    @ObservationIgnored var _test_codexCreditsLoaderOverride: (@MainActor () async throws -> CreditsSnapshot)?
-    @ObservationIgnored var _test_widgetSnapshotSaveOverride: (@MainActor (WidgetSnapshot) async -> Void)?
-    @ObservationIgnored var _test_providerRefreshOverride: (@MainActor (UsageProvider) async -> Void)?
-    @ObservationIgnored var _test_tokenUsageRefreshOverride: (@MainActor (UsageProvider, Bool) async -> Void)?
-    @ObservationIgnored var _test_providerStatusFetchOverride: (@MainActor (
+    var _test_codexCreditsLoaderOverride: (@MainActor () async throws -> CreditsSnapshot)?
+    var _test_widgetSnapshotSaveOverride: (@MainActor (WidgetSnapshot) async -> Void)?
+    var _test_providerRefreshOverride: (@MainActor (UsageProvider) async -> Void)?
+    var _test_tokenUsageRefreshOverride: (@MainActor (UsageProvider, Bool) async -> Void)?
+    var _test_providerStatusFetchOverride: (@MainActor (
         UsageProvider) async throws -> ProviderStatus)?
-    @ObservationIgnored var _test_startupConnectivityRetryScheduled: (@MainActor (Int, TimeInterval) -> Void)?
-    @ObservationIgnored var _test_startupConnectivityRetrySleepOverride: (@MainActor (
+    var _test_startupConnectivityRetryScheduled: (@MainActor (Int, TimeInterval) -> Void)?
+    var _test_startupConnectivityRetrySleepOverride: (@MainActor (
         TimeInterval) async throws -> Void)?
-    @ObservationIgnored var widgetSnapshotPersistTask: Task<Void, Never>?
+    var widgetSnapshotPersistTask: Task<Void, Never>?
 
-    @ObservationIgnored let codexFetcher: UsageFetcher
-    @ObservationIgnored let claudeFetcher: any ClaudeUsageFetching
-    @ObservationIgnored let costUsageFetcher: CostUsageFetcher
-    @ObservationIgnored let browserDetection: BrowserDetection
-    @ObservationIgnored private let registry: ProviderRegistry
-    @ObservationIgnored let settings: SettingsStore
-    @ObservationIgnored let environmentBase: [String: String]
-    @ObservationIgnored private let sessionQuotaNotifier: any SessionQuotaNotifying
-    @ObservationIgnored private let sessionQuotaLogger = CodexBarLog.logger(LogCategories.sessionQuota)
-    @ObservationIgnored let openAIWebLogger = CodexBarLog.logger(LogCategories.openAIWeb)
-    @ObservationIgnored private let tokenCostLogger = CodexBarLog.logger(LogCategories.tokenCost)
-    @ObservationIgnored let augmentLogger = CodexBarLog.logger(LogCategories.augment)
-    @ObservationIgnored let providerLogger = CodexBarLog.logger(LogCategories.providers)
-    @ObservationIgnored var openAIWebDebugLines: [String] = []
-    @ObservationIgnored var failureGates: [UsageProvider: ConsecutiveFailureGate] = [:]
-    @ObservationIgnored var tokenFailureGates: [UsageProvider: ConsecutiveFailureGate] = [:]
-    @ObservationIgnored var providerSpecs: [UsageProvider: ProviderSpec] = [:]
-    @ObservationIgnored let providerMetadata: [UsageProvider: ProviderMetadata]
-    @ObservationIgnored var providerRuntimes: [UsageProvider: any ProviderRuntime] = [:]
-    @ObservationIgnored var providerRefreshCoordinator = ProviderRefreshCoordinator<UsageProvider>()
-    @ObservationIgnored private var providerAvailabilityCache: [UsageProvider: ProviderAvailabilityCacheEntry] = [:]
-    @ObservationIgnored var accountInfoCache: [UsageProvider: AccountInfoCacheEntry] = [:]
-    @ObservationIgnored private var timerTask: Task<Void, Never>?
-    @ObservationIgnored private var tokenTimerTask: Task<Void, Never>?
-    @ObservationIgnored private var tokenRefreshSequenceTask: Task<Void, Never>?
-    @ObservationIgnored private var tokenRefreshSequenceProvider: UsageProvider?
-    @ObservationIgnored var memoryPressureReliefTask: Task<Void, Never>?
-    @ObservationIgnored var startupConnectivityRetryTask: Task<Void, Never>?
-    @ObservationIgnored var startupConnectivityRetryNeeded = false
-    @ObservationIgnored var startupConnectivityRetryRefreshActive = false
-    @ObservationIgnored var storageRefreshTask: Task<Void, Never>?
-    @ObservationIgnored var storageRefreshGeneration: UInt64 = 0
-    @ObservationIgnored var storageRefreshInFlightSignature: String?
-    @ObservationIgnored var storageRefreshInFlightRequestKey: String?
-    @ObservationIgnored var lastStorageRefreshSignature: String?
-    @ObservationIgnored var lastStorageRefreshRequestKey: String?
-    @ObservationIgnored var lastStorageRefreshAt: Date?
-    @ObservationIgnored var managedCodexAccountsForStorageOverride: [ManagedCodexAccount]?
-    @ObservationIgnored private var pathDebugRefreshTask: Task<Void, Never>?
-    @ObservationIgnored var codexPlanHistoryBackfillTask: Task<Void, Never>?
-    @ObservationIgnored let historicalUsageHistoryStore: HistoricalUsageHistoryStore
-    @ObservationIgnored let planUtilizationHistoryStore: PlanUtilizationHistoryStore
-    @ObservationIgnored let codexAccountUsageSnapshotStore: (any CodexAccountUsageSnapshotStoring)?
-    @ObservationIgnored var codexHistoricalDataset: CodexHistoricalDataset?
-    @ObservationIgnored var codexHistoricalDatasetAccountKey: String?
-    @ObservationIgnored var lastKnownResetSnapshots: [UsageProvider: UsageSnapshot] = [:]
-    @ObservationIgnored var lastKnownSessionRemaining: [UsageProvider: Double] = [:]
-    @ObservationIgnored var lastKnownSessionWindowSource: [UsageProvider: SessionQuotaWindowSource] = [:]
-    @ObservationIgnored var quotaWarningState: [QuotaWarningStateKey: QuotaWarningState] = [:]
-    @ObservationIgnored var lastPermissionPromptNotificationAt: [UsageProvider: Date] = [:]
-    @ObservationIgnored var lastTokenFetchAt: [UsageProvider: Date] = [:]
-    @ObservationIgnored var lastTokenFetchScope: [UsageProvider: String] = [:]
-    @ObservationIgnored var planUtilizationHistory: [UsageProvider: PlanUtilizationHistoryBuckets] = [:]
-    @ObservationIgnored var sessionLimitResetDetectorStates: [String: LimitResetDetectorState] = [:]
-    @ObservationIgnored var weeklyLimitResetDetectorStates: [String: LimitResetDetectorState] = [:]
-    @ObservationIgnored private var hasCompletedInitialRefresh: Bool = false
-    @ObservationIgnored private let providerAvailabilityCacheTTL: TimeInterval = 1
-    @ObservationIgnored let accountInfoCacheTTL: TimeInterval = 30
-    @ObservationIgnored private let tokenFetchTTL: TimeInterval = 60 * 60
-    @ObservationIgnored private let tokenFetchTimeout: TimeInterval = 10 * 60
-    @ObservationIgnored let startupBehavior: StartupBehavior
-    @ObservationIgnored let planUtilizationPersistenceCoordinator: PlanUtilizationHistoryPersistenceCoordinator
+    let codexFetcher: UsageFetcher
+    let claudeFetcher: any ClaudeUsageFetching
+    let costUsageFetcher: CostUsageFetcher
+    let browserDetection: BrowserDetection
+    private let registry: ProviderRegistry
+    let settings: SettingsStore
+    let environmentBase: [String: String]
+    private let sessionQuotaNotifier: any SessionQuotaNotifying
+    private let sessionQuotaLogger = CodexBarLog.logger(LogCategories.sessionQuota)
+    let openAIWebLogger = CodexBarLog.logger(LogCategories.openAIWeb)
+    private let tokenCostLogger = CodexBarLog.logger(LogCategories.tokenCost)
+    let augmentLogger = CodexBarLog.logger(LogCategories.augment)
+    let providerLogger = CodexBarLog.logger(LogCategories.providers)
+    var openAIWebDebugLines: [String] = []
+    var failureGates: [UsageProvider: ConsecutiveFailureGate] = [:]
+    var tokenFailureGates: [UsageProvider: ConsecutiveFailureGate] = [:]
+    var providerSpecs: [UsageProvider: ProviderSpec] = [:]
+    let providerMetadata: [UsageProvider: ProviderMetadata]
+    var providerRuntimes: [UsageProvider: any ProviderRuntime] = [:]
+    var providerRefreshCoordinator = ProviderRefreshCoordinator<UsageProvider>()
+    private var providerAvailabilityCache: [UsageProvider: ProviderAvailabilityCacheEntry] = [:]
+    var accountInfoCache: [UsageProvider: AccountInfoCacheEntry] = [:]
+    private var timerTask: Task<Void, Never>?
+    private var tokenTimerTask: Task<Void, Never>?
+    private var tokenRefreshSequenceTask: Task<Void, Never>?
+    private var tokenRefreshSequenceProvider: UsageProvider?
+    private var settingsChangeCancellable: AnyCancellable?
+    var memoryPressureReliefTask: Task<Void, Never>?
+    var startupConnectivityRetryTask: Task<Void, Never>?
+    var startupConnectivityRetryNeeded = false
+    var startupConnectivityRetryRefreshActive = false
+    var storageRefreshTask: Task<Void, Never>?
+    var storageRefreshGeneration: UInt64 = 0
+    var storageRefreshInFlightSignature: String?
+    var storageRefreshInFlightRequestKey: String?
+    var lastStorageRefreshSignature: String?
+    var lastStorageRefreshRequestKey: String?
+    var lastStorageRefreshAt: Date?
+    var managedCodexAccountsForStorageOverride: [ManagedCodexAccount]?
+    private var pathDebugRefreshTask: Task<Void, Never>?
+    var codexPlanHistoryBackfillTask: Task<Void, Never>?
+    let historicalUsageHistoryStore: HistoricalUsageHistoryStore
+    let planUtilizationHistoryStore: PlanUtilizationHistoryStore
+    let codexAccountUsageSnapshotStore: (any CodexAccountUsageSnapshotStoring)?
+    var codexHistoricalDataset: CodexHistoricalDataset?
+    var codexHistoricalDatasetAccountKey: String?
+    var lastKnownResetSnapshots: [UsageProvider: UsageSnapshot] = [:]
+    var lastKnownSessionRemaining: [UsageProvider: Double] = [:]
+    var lastKnownSessionWindowSource: [UsageProvider: SessionQuotaWindowSource] = [:]
+    var quotaWarningState: [QuotaWarningStateKey: QuotaWarningState] = [:]
+    var lastPermissionPromptNotificationAt: [UsageProvider: Date] = [:]
+    var lastTokenFetchAt: [UsageProvider: Date] = [:]
+    var lastTokenFetchScope: [UsageProvider: String] = [:]
+    var planUtilizationHistory: [UsageProvider: PlanUtilizationHistoryBuckets] = [:]
+    var sessionLimitResetDetectorStates: [String: LimitResetDetectorState] = [:]
+    var weeklyLimitResetDetectorStates: [String: LimitResetDetectorState] = [:]
+    private var hasCompletedInitialRefresh: Bool = false
+    private let providerAvailabilityCacheTTL: TimeInterval = 1
+    let accountInfoCacheTTL: TimeInterval = 30
+    private let tokenFetchTTL: TimeInterval = 60 * 60
+    private let tokenFetchTimeout: TimeInterval = 10 * 60
+    let startupBehavior: StartupBehavior
+    let planUtilizationPersistenceCoordinator: PlanUtilizationHistoryPersistenceCoordinator
 
     init(
         fetcher: UsageFetcher,

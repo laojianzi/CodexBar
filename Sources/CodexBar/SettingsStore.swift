@@ -1,6 +1,6 @@
 import AppKit
 import CodexBarCore
-import Observation
+import Combine
 import ServiceManagement
 
 enum RefreshFrequency: String, CaseIterable, Identifiable {
@@ -166,8 +166,7 @@ enum CodexAccountMenuProjectionRevalidationResult: Equatable {
 }
 
 @MainActor
-@Observable
-final class SettingsStore {
+final class SettingsStore: ObservableObject {
     static let sharedDefaults = AppGroupSupport.sharedDefaults()
     static let mergedOverviewProviderLimit = 3
     static let productionCodexAccountReconciliationSnapshotCacheInterval: TimeInterval = 2
@@ -183,27 +182,27 @@ final class SettingsStore {
     static var codexAccountReconciliationSnapshotCacheIntervalOverrideForTesting: TimeInterval?
     #endif
 
-    @ObservationIgnored let userDefaults: UserDefaults
-    @ObservationIgnored let configStore: CodexBarConfigStore
-    @ObservationIgnored let antigravityOAuthCredentialsStore: AntigravityOAuthCredentialsStore
-    @ObservationIgnored var config: CodexBarConfig
-    @ObservationIgnored var configPersistTask: Task<Void, Never>?
-    @ObservationIgnored var configLoading = false
-    @ObservationIgnored var tokenAccountsLoaded = false
-    @ObservationIgnored var cachedCodexAccountReconciliationSnapshot:
+    let userDefaults: UserDefaults
+    let configStore: CodexBarConfigStore
+    let antigravityOAuthCredentialsStore: AntigravityOAuthCredentialsStore
+    var config: CodexBarConfig
+    var configPersistTask: Task<Void, Never>?
+    var configLoading = false
+    var tokenAccountsLoaded = false
+    var cachedCodexAccountReconciliationSnapshot:
         CachedCodexAccountReconciliationSnapshot?
-    @ObservationIgnored var cachedCodexAccountMenuProjection: CachedCodexAccountMenuProjection?
-    @ObservationIgnored var codexAccountReconciliationGeneration: UInt = 0
+    var cachedCodexAccountMenuProjection: CachedCodexAccountMenuProjection?
+    var codexAccountReconciliationGeneration: UInt = 0
     #if DEBUG
-    @ObservationIgnored var _test_codexAccountSnapshotLoader:
+    var _test_codexAccountSnapshotLoader:
         (@Sendable (CodexActiveSource) -> CodexAccountReconciliationSnapshot)?
     #endif
-    @ObservationIgnored var mergedMenuLastSelectedWasOverviewStorage = false
-    @ObservationIgnored var selectedMenuProviderRawStorage: String?
-    var defaultsState: SettingsDefaultsState
-    var configRevision: Int = 0
-    var providerOrder: [UsageProvider] = []
-    var providerEnablement: [UsageProvider: Bool] = [:]
+    var mergedMenuLastSelectedWasOverviewStorage = false
+    var selectedMenuProviderRawStorage: String?
+    @Published var defaultsState: SettingsDefaultsState
+    @Published var configRevision: Int = 0
+    @Published var providerOrder: [UsageProvider] = []
+    @Published var providerEnablement: [UsageProvider: Bool] = [:]
 
     static func shouldBridgeSharedDefaults(for userDefaults: UserDefaults) -> Bool {
         if !self.isRunningTests { return true }

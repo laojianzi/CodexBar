@@ -1,5 +1,5 @@
+import Combine
 import Foundation
-import Observation
 
 struct CodexSystemAccountPromotionUserFacingError: Error, Equatable {
     let title: String
@@ -7,13 +7,12 @@ struct CodexSystemAccountPromotionUserFacingError: Error, Equatable {
 }
 
 @MainActor
-@Observable
-final class CodexAccountPromotionCoordinator {
+final class CodexAccountPromotionCoordinator: ObservableObject {
     let service: CodexAccountPromotionService
     weak var managedAccountCoordinator: ManagedCodexAccountCoordinator?
-    private(set) var isAuthenticatingLiveAccount = false
-    private(set) var isPromotingSystemAccount = false
-    private(set) var userFacingError: CodexSystemAccountPromotionUserFacingError?
+    @Published private(set) var isAuthenticatingLiveAccount = false
+    @Published private(set) var isPromotingSystemAccount = false
+    @Published private(set) var userFacingError: CodexSystemAccountPromotionUserFacingError?
 
     init(
         service: CodexAccountPromotionService,

@@ -4,8 +4,8 @@ import SwiftUI
 
 @MainActor
 struct DebugPane: View {
-    @Bindable var settings: SettingsStore
-    @Bindable var store: UsageStore
+    @ObservedObject var settings: SettingsStore
+    @ObservedObject var store: UsageStore
     @AppStorage("debugFileLoggingEnabled") private var debugFileLoggingEnabled = false
     @State private var currentLogProvider: UsageProvider = .codex
     @State private var currentFetchProvider: UsageProvider = .codex
@@ -32,7 +32,7 @@ struct DebugPane: View {
                         title: L("enable_file_logging"),
                         subtitle: String(format: L("enable_file_logging_subtitle"), self.fileLogPath),
                         binding: self.$debugFileLoggingEnabled)
-                        .onChange(of: self.debugFileLoggingEnabled) { _, newValue in
+                        .onChange(of: self.debugFileLoggingEnabled) { newValue in
                             if self.settings.debugFileLoggingEnabled != newValue {
                                 self.settings.debugFileLoggingEnabled = newValue
                             }

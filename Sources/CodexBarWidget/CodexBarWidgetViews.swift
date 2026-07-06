@@ -2,8 +2,16 @@ import CodexBarCore
 import SwiftUI
 import WidgetKit
 
+// swiftformat:disable environmentEntry
+private struct WidgetUsageShowsUsedEnvironmentKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
 extension EnvironmentValues {
-    @Entry fileprivate var widgetUsageShowsUsed: Bool = false
+    fileprivate var widgetUsageShowsUsed: Bool {
+        get { self[WidgetUsageShowsUsedEnvironmentKey.self] }
+        set { self[WidgetUsageShowsUsedEnvironmentKey.self] = newValue }
+    }
 }
 
 struct CodexBarUsageWidgetView: View {
@@ -20,7 +28,7 @@ struct CodexBarUsageWidgetView: View {
                 self.emptyState
             }
         }
-        .containerBackground(.fill.tertiary, for: .widget)
+        .codexWidgetBackground()
         .environment(\.widgetUsageShowsUsed, self.entry.snapshot.usageBarsShowUsed)
     }
 
@@ -63,7 +71,7 @@ struct CodexBarHistoryWidgetView: View {
                 self.emptyState
             }
         }
-        .containerBackground(.fill.tertiary, for: .widget)
+        .codexWidgetBackground()
     }
 
     private var emptyState: some View {
@@ -92,7 +100,7 @@ struct CodexBarCompactWidgetView: View {
                 self.emptyState
             }
         }
-        .containerBackground(.fill.tertiary, for: .widget)
+        .codexWidgetBackground()
     }
 
     private var emptyState: some View {
@@ -131,7 +139,7 @@ struct CodexBarSwitcherWidgetView: View {
             }
             .padding(12)
         }
-        .containerBackground(.fill.tertiary, for: .widget)
+        .codexWidgetBackground()
         .environment(\.widgetUsageShowsUsed, self.entry.snapshot.usageBarsShowUsed)
     }
 
@@ -243,24 +251,23 @@ private struct ProviderSwitchChip: View {
             ? WidgetColors.color(for: self.provider).opacity(0.2)
             : Color.primary.opacity(0.08)
 
-        if let choice = ProviderChoice(provider: self.provider) {
+        if #available(macOS 14.0, *), let choice = ProviderChoice(provider: self.provider) {
             Button(intent: SwitchWidgetProviderIntent(provider: choice)) {
-                Text(label)
-                    .font(self.compact ? .caption2.weight(.semibold) : .caption.weight(.semibold))
-                    .foregroundStyle(self.selected ? Color.primary : Color.secondary)
-                    .padding(.horizontal, self.compact ? 6 : 8)
-                    .padding(.vertical, self.compact ? 3 : 4)
-                    .background(Capsule().fill(background))
+                self.labelView(label: label, background: background)
             }
             .buttonStyle(.plain)
         } else {
-            Text(label)
-                .font(self.compact ? .caption2.weight(.semibold) : .caption.weight(.semibold))
-                .foregroundStyle(self.selected ? Color.primary : Color.secondary)
-                .padding(.horizontal, self.compact ? 6 : 8)
-                .padding(.vertical, self.compact ? 3 : 4)
-                .background(Capsule().fill(background))
+            self.labelView(label: label, background: background)
         }
+    }
+
+    private func labelView(label: String, background: Color) -> some View {
+        Text(label)
+            .font(self.compact ? .caption2.weight(.semibold) : .caption.weight(.semibold))
+            .foregroundStyle(self.selected ? Color.primary : Color.secondary)
+            .padding(.horizontal, self.compact ? 6 : 8)
+            .padding(.vertical, self.compact ? 3 : 4)
+            .background(Capsule().fill(background))
     }
 
     private var longLabel: String {
@@ -712,7 +719,7 @@ private struct HistoryView: View {
     }
 }
 
-private struct HeaderView: View {
+struct HeaderView: View {
     let provider: UsageProvider
     let updatedAt: Date
 

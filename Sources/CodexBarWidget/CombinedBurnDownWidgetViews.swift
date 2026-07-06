@@ -5,6 +5,7 @@ import WidgetKit
 
 // MARK: - Entry View
 
+@available(macOS 14.0, *)
 struct CombinedBurnDownWidgetView: View {
     let entry: CombinedBurnDownEntry
 
@@ -21,7 +22,7 @@ struct CombinedBurnDownWidgetView: View {
                 self.emptyState
             }
         }
-        .containerBackground(for: .widget) {
+        .codexWidgetBackground {
             BurnWidgetBackground()
         }
     }
@@ -42,6 +43,7 @@ struct CombinedBurnDownWidgetView: View {
 
 // MARK: - Layout
 
+@available(macOS 14.0, *)
 private struct CombinedBurnDownLayout: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     @Environment(\.colorScheme) private var colorScheme

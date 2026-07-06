@@ -1,7 +1,7 @@
 import AppKit
 import CodexBarCore
+import Combine
 import Foundation
-import Observation
 import Testing
 @testable import CodexBar
 
@@ -388,9 +388,7 @@ struct ProviderStorageFootprintTests {
         // Storage scans run on every menu open and every ~5 min; an unconditional re-publish wakes
         // the controller's `menuObservationToken` -> `invalidateMenus` path for no value change.
         let didRepublish = ObservationFlag()
-        withObservationTracking {
-            _ = store.providerStorageFootprints
-        } onChange: {
+        let cancellable = store.$providerStorageFootprints.dropFirst().sink { _ in
             didRepublish.set()
         }
         await store.refreshStorageFootprintsNow(for: [.codex])
@@ -398,6 +396,7 @@ struct ProviderStorageFootprintTests {
 
         #expect(didRepublish.get() == false)
         #expect(store.storageFootprint(for: .codex)?.totalBytes == 32)
+        _ = cancellable
     }
 
     @Test

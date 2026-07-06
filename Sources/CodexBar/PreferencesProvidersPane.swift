@@ -4,8 +4,8 @@ import SwiftUI
 
 @MainActor
 struct ProvidersPane: View {
-    @Bindable var settings: SettingsStore
-    @Bindable var store: UsageStore
+    @ObservedObject var settings: SettingsStore
+    @ObservedObject var store: UsageStore
     let managedCodexAccountCoordinator: ManagedCodexAccountCoordinator
     let codexAccountPromotionCoordinator: CodexAccountPromotionCoordinator
     let codexAmbientLoginRunner: any CodexAmbientLoginRunning
@@ -131,10 +131,10 @@ struct ProvidersPane: View {
         .onAppear {
             self.ensureSelection()
         }
-        .onChange(of: self.providers) { _, _ in
+        .onChange(of: self.providers) { _ in
             self.ensureSelection()
         }
-        .onChange(of: self.providerSearchText) { _, _ in
+        .onChange(of: self.providerSearchText) { _ in
             self.ensureSelection()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in

@@ -2,6 +2,7 @@ import AppIntents
 import CodexBarCore
 import WidgetKit
 
+@available(macOS 14.0, *)
 enum BurnProviderChoice: String, AppEnum {
     case codex
     case claude
@@ -21,10 +22,13 @@ enum BurnProviderChoice: String, AppEnum {
     }
 }
 
-enum BurnWindowChoice: String, AppEnum {
+enum BurnWindowChoice: String {
     case session
     case weekly
+}
 
+@available(macOS 14.0, *)
+extension BurnWindowChoice: AppEnum {
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Usage window")
 
     static let caseDisplayRepresentations: [BurnWindowChoice: DisplayRepresentation] = [
@@ -33,6 +37,7 @@ enum BurnWindowChoice: String, AppEnum {
     ]
 }
 
+@available(macOS 14.0, *)
 struct BurnDownSelectionIntent: AppIntent, WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Burn Down"
     static let description = IntentDescription("Select the provider and usage window to display.")
@@ -49,6 +54,7 @@ struct BurnDownSelectionIntent: AppIntent, WidgetConfigurationIntent {
     }
 }
 
+@available(macOS 14.0, *)
 struct BurnProviderSelectionIntent: AppIntent, WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Burn Down Provider"
     static let description = IntentDescription("Select the provider to display.")
@@ -165,6 +171,77 @@ enum BurnDownRefreshSchedule {
     }
 }
 
+struct LegacyBurnDownTimelineProvider: TimelineProvider {
+    let window: BurnWindowChoice
+
+    func placeholder(in context: Context) -> BurnDownEntry {
+        BurnDownEntry(
+            date: Date(),
+            provider: .codex,
+            window: self.window,
+            snapshot: WidgetPreviewData.snapshot())
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (BurnDownEntry) -> Void) {
+        completion(self.makeEntry(snapshot: WidgetSnapshotStore.load() ?? WidgetPreviewData.snapshot()))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<BurnDownEntry>) -> Void) {
+        let snapshot = WidgetSnapshotStore.load() ?? WidgetPreviewData.emptySnapshot()
+        let entry = self.makeEntry(snapshot: snapshot)
+        let refresh = BurnDownRefreshSchedule.nextRefresh(snapshot: snapshot, provider: entry.provider)
+        completion(Timeline(entries: [entry], policy: .after(refresh)))
+    }
+
+    private func makeEntry(snapshot: WidgetSnapshot) -> BurnDownEntry {
+        let provider = Self.selectedBurnProvider(snapshot: snapshot)
+        return BurnDownEntry(
+            date: Date(),
+            provider: provider,
+            window: self.window,
+            snapshot: snapshot)
+    }
+
+    static func selectedBurnProvider(snapshot: WidgetSnapshot) -> UsageProvider {
+        let providers = CodexBarSwitcherTimelineProvider.supportedProviders(from: snapshot)
+        let stored = WidgetSelectionStore.loadSelectedProvider()
+        if [.codex, .claude].contains(stored), providers.contains(stored) {
+            return stored
+        }
+        if providers.contains(.codex) { return .codex }
+        if providers.contains(.claude) { return .claude }
+        return .codex
+    }
+}
+
+struct LegacyCombinedBurnDownTimelineProvider: TimelineProvider {
+    func placeholder(in context: Context) -> CombinedBurnDownEntry {
+        CombinedBurnDownEntry(
+            date: Date(),
+            provider: .codex,
+            snapshot: WidgetPreviewData.snapshot())
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (CombinedBurnDownEntry) -> Void) {
+        completion(self.makeEntry(snapshot: WidgetSnapshotStore.load() ?? WidgetPreviewData.snapshot()))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<CombinedBurnDownEntry>) -> Void) {
+        let snapshot = WidgetSnapshotStore.load() ?? WidgetPreviewData.emptySnapshot()
+        let entry = self.makeEntry(snapshot: snapshot)
+        let refresh = BurnDownRefreshSchedule.nextRefresh(snapshot: snapshot, provider: entry.provider)
+        completion(Timeline(entries: [entry], policy: .after(refresh)))
+    }
+
+    private func makeEntry(snapshot: WidgetSnapshot) -> CombinedBurnDownEntry {
+        CombinedBurnDownEntry(
+            date: Date(),
+            provider: LegacyBurnDownTimelineProvider.selectedBurnProvider(snapshot: snapshot),
+            snapshot: snapshot)
+    }
+}
+
+@available(macOS 14.0, *)
 struct BurnDownTimelineProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> BurnDownEntry {
         BurnDownEntry(
@@ -196,6 +273,7 @@ struct BurnDownTimelineProvider: AppIntentTimelineProvider {
     }
 }
 
+@available(macOS 14.0, *)
 struct CombinedBurnDownTimelineProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> CombinedBurnDownEntry {
         CombinedBurnDownEntry(

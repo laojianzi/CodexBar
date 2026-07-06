@@ -1,6 +1,6 @@
 import AppKit
 import CodexBarCore
-import Observation
+import Combine
 import SwiftUI
 
 extension StatusItemController {
@@ -76,9 +76,8 @@ protocol MenuCardMeasuring: AnyObject {
 }
 
 @MainActor
-@Observable
-final class MenuCardHighlightState {
-    var isHighlighted = false
+final class MenuCardHighlightState: ObservableObject {
+    @Published var isHighlighted = false
 }
 
 final class MenuHostingView<Content: View>: NSHostingView<Content> {
@@ -469,17 +468,17 @@ final class PersistentRefreshMenuView: NSView, MenuCardHighlighting {
 }
 
 struct MenuCardSectionContainerView<Content: View>: View {
-    @Bindable var highlightState: MenuCardHighlightState
+    @ObservedObject var highlightState: MenuCardHighlightState
     let showsSubmenuIndicator: Bool
     let submenuIndicatorAlignment: Alignment
     let submenuIndicatorTopPadding: CGFloat
-    var refreshMonitor: MenuCardRefreshMonitor?
+    @ObservedObject var refreshMonitor: MenuCardRefreshMonitor
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         self.content()
             .environment(\.menuItemHighlighted, self.highlightState.isHighlighted)
-            .environment(\.menuCardRefreshMonitor, self.refreshMonitor)
+            .environmentObject(self.refreshMonitor)
             .foregroundStyle(MenuHighlightStyle.primary(self.highlightState.isHighlighted))
             .background(alignment: .topLeading) {
                 if self.highlightState.isHighlighted {

@@ -1,4 +1,4 @@
-import Observation
+import Combine
 
 struct IconPerfRefreshCycleMetrics {
     var updateIconsCalls = 0
@@ -8,16 +8,18 @@ struct IconPerfRefreshCycleMetrics {
 
 extension StatusItemController {
     func observeIconPerfRefreshCycleChanges() {
-        withObservationTracking {
-            _ = self.store.isRefreshing
-            _ = self.settings.debugLogLevel
-        } onChange: { [weak self] in
+        self.store.$isRefreshing.sink { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.observeIconPerfRefreshCycleChanges()
                 self.handleIconPerfRefreshCycleChange()
             }
-        }
+        }.store(in: &self.observationCancellables)
+        self.settings.objectWillChange.sink { [weak self] _ in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.handleIconPerfRefreshCycleChange()
+            }
+        }.store(in: &self.observationCancellables)
         self.handleIconPerfRefreshCycleChange()
     }
 
