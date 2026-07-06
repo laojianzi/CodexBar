@@ -9,7 +9,7 @@ enum ProviderMetricInlinePresentation: Equatable {
 @MainActor
 struct ProviderDetailView<SupplementaryContent: View>: View {
     let provider: UsageProvider
-    @Bindable var store: UsageStore
+    @ObservedObject var store: UsageStore
     @Binding var isEnabled: Bool
     let subtitle: String
     let model: UsageMenuCardView.Model
@@ -224,7 +224,7 @@ struct ProviderDetailView<SupplementaryContent: View>: View {
 @MainActor
 private struct ProviderDetailHeaderView: View {
     let provider: UsageProvider
-    @Bindable var store: UsageStore
+    @ObservedObject var store: UsageStore
     @Binding var isEnabled: Bool
     let subtitle: String
     let model: UsageMenuCardView.Model
@@ -306,7 +306,7 @@ private struct ProviderDetailBrandIcon: View {
 @MainActor
 private struct ProviderDetailInfoGrid: View {
     let provider: UsageProvider
-    @Bindable var store: UsageStore
+    @ObservedObject var store: UsageStore
     let isEnabled: Bool
     let model: UsageMenuCardView.Model
     let labelWidth: CGFloat
@@ -319,7 +319,7 @@ private struct ProviderDetailInfoGrid: View {
         let email = self.model.email
         let enabledText = self.isEnabled ? L("Enabled") : L("Disabled")
 
-        Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
+        VStack(alignment: .leading, spacing: 6) {
             ProviderDetailInfoRow(label: L("State"), value: enabledText, labelWidth: self.labelWidth)
             ProviderDetailInfoRow(label: L("Source"), value: source, labelWidth: self.labelWidth)
             ProviderDetailInfoRow(label: L("Version"), value: version, labelWidth: self.labelWidth)

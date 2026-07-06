@@ -1,14 +1,13 @@
 import SwiftUI
 
 struct HiddenWindowView: View {
-    @Environment(\.openSettings) private var openSettings
-
     var body: some View {
         Color.clear
             .frame(width: 20, height: 20)
             .onReceive(NotificationCenter.default.publisher(for: .codexbarOpenSettings)) { _ in
                 Task { @MainActor in
-                    self.openSettings()
+                    NSApp.activate(ignoringOtherApps: true)
+                    _ = NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
                 }
             }
             .task {

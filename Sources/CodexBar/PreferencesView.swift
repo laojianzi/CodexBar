@@ -59,10 +59,10 @@ struct PreferencesTabLayoutCoordinator {
 
 @MainActor
 struct PreferencesView: View {
-    @Bindable var settings: SettingsStore
-    @Bindable var store: UsageStore
+    @ObservedObject var settings: SettingsStore
+    @ObservedObject var store: UsageStore
     let updater: UpdaterProviding
-    @Bindable var selection: PreferencesSelection
+    @ObservedObject var selection: PreferencesSelection
     let managedCodexAccountCoordinator: ManagedCodexAccountCoordinator
     let codexAccountPromotionCoordinator: CodexAccountPromotionCoordinator
     let runProviderLoginFlow: @MainActor (UsageProvider) async -> Void
@@ -138,14 +138,14 @@ struct PreferencesView: View {
             self.updateLayout(for: self.selection.tab, animate: false)
             self.ensureValidTabSelection()
         }
-        .onChange(of: self.selection.tab) { _, newValue in
+        .onChange(of: self.selection.tab) { newValue in
             guard let tab = self.tabLayoutCoordinator.layoutForObservedSelection(
                 newValue,
                 current: self.selection.tab)
             else { return }
             self.updateLayout(for: tab, animate: true)
         }
-        .onChange(of: self.settings.debugMenuEnabled) { _, _ in
+        .onChange(of: self.settings.debugMenuEnabled) { _ in
             self.ensureValidTabSelection()
         }
     }

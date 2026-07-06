@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor
 struct AdvancedPane: View {
-    @Bindable var settings: SettingsStore
+    @ObservedObject var settings: SettingsStore
     @State private var isInstallingCLI = false
     @State private var cliStatus: String?
 

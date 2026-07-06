@@ -1,6 +1,6 @@
 import AppKit
 import CodexBarCore
-import Observation
+import Combine
 import QuartzCore
 
 // MARK: - Status item controller (AppKit-hosted icons, SwiftUI popovers)
@@ -163,6 +163,7 @@ final class StatusItemController: NSObject, NSMenuDelegate, StatusItemControllin
     var overviewScrollAccumulatedDelta: CGFloat = 0
     var overviewScrollNavigationHandlerForTesting: ((OverviewScrollStep) -> Void)?
     var hasPreparedForAppShutdown = false
+    var observationCancellables = Set<AnyCancellable>()
     var scheduleQuitTermination: (@escaping @MainActor () -> Void) -> Void = { operation in
         DispatchQueue.main.async {
             Task { @MainActor in
@@ -500,18 +501,14 @@ final class StatusItemController: NSObject, NSMenuDelegate, StatusItemControllin
     }
 
     private func observeStoreChanges() {
-        withObservationTracking {
-            _ = self.store.menuObservationToken
-        } onChange: { [weak self] in
+        self.store.objectWillChange.sink { [weak self] _ in
             Task { @MainActor [weak self] in
-                guard let self else { return }
-                self.handleObservedStoreMenuChange()
+                self?.handleObservedStoreMenuChange()
             }
-        }
+        }.store(in: &self.observationCancellables)
     }
 
     func handleObservedStoreMenuChange() {
-        self.observeStoreChanges()
         self.updatePersistentRefreshItemsEnabled()
         let rootOpenHandledReadiness = self.consumeRootOpenHandledMenuObservationIfNeeded()
         // `refreshOpenMenus` is only consulted when a menu is currently open.
@@ -529,44 +526,35 @@ final class StatusItemController: NSObject, NSMenuDelegate, StatusItemControllin
     }
 
     private func observeStoreIconChanges() {
-        withObservationTracking {
-            _ = self.store.iconObservationToken
-        } onChange: { [weak self] in
+        self.store.objectWillChange.sink { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.observeStoreIconChanges()
                 let signature = self.storeIconObservationSignature()
                 guard signature != self.lastObservedStoreIconWorkSignature else { return }
                 // Reuse the signature we just computed for the change check; `updateIcons` would
                 // otherwise recompute the identical value on the same main-actor turn.
                 self.updateIcons(precomputedStoreIconSignature: signature)
             }
-        }
+        }.store(in: &self.observationCancellables)
     }
 
     private func observeDebugForceAnimation() {
-        withObservationTracking {
-            _ = self.store.debugForceAnimation
-        } onChange: { [weak self] in
+        self.store.$debugForceAnimation.sink { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.observeDebugForceAnimation()
                 self.updateVisibility()
                 self.updateBlinkingState()
             }
-        }
+        }.store(in: &self.observationCancellables)
     }
 
     private func observeSettingsChanges() {
-        withObservationTracking {
-            _ = self.settings.menuObservationToken
-        } onChange: { [weak self] in
+        self.settings.objectWillChange.sink { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.observeSettingsChanges()
                 self.handleSettingsChange(reason: "observation")
             }
-        }
+        }.store(in: &self.observationCancellables)
     }
 
     func handleProviderConfigChange(reason: String) {
@@ -596,32 +584,27 @@ final class StatusItemController: NSObject, NSMenuDelegate, StatusItemControllin
     }
 
     private func observeUpdaterChanges() {
-        withObservationTracking {
-            _ = self.updater.updateStatus.isUpdateReady
-        } onChange: { [weak self] in
+        self.updater.updateStatus.objectWillChange.sink { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.observeUpdaterChanges()
                 self.invalidateMenus()
             }
-        }
+        }.store(in: &self.observationCancellables)
     }
 
     private func observeManagedCodexCoordinatorChanges() {
-        withObservationTracking {
-            _ = self.managedCodexAccountCoordinator.isAuthenticatingManagedAccount
-            _ = self.managedCodexAccountCoordinator.authenticatingManagedAccountID
-            _ = self.managedCodexAccountCoordinator.isRemovingManagedAccount
-            _ = self.managedCodexAccountCoordinator.removingManagedAccountID
-            _ = self.codexAccountPromotionCoordinator.isAuthenticatingLiveAccount
-            _ = self.codexAccountPromotionCoordinator.isPromotingSystemAccount
-        } onChange: { [weak self] in
+        self.managedCodexAccountCoordinator.objectWillChange.sink { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.observeManagedCodexCoordinatorChanges()
                 self.refreshMenusForLoginStateChange()
             }
-        }
+        }.store(in: &self.observationCancellables)
+        self.codexAccountPromotionCoordinator.objectWillChange.sink { [weak self] _ in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.refreshMenusForLoginStateChange()
+            }
+        }.store(in: &self.observationCancellables)
     }
 
     private func shouldRefreshOpenMenusForProviderSwitcher() -> Bool {

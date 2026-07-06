@@ -100,8 +100,8 @@ if [[ -s "$unterminated_output" ]]; then
 fi
 
 verify="${ROOT_DIR}/Scripts/ci_verify_test_jobs.sh"
-"$verify" success success true success >/dev/null
-"$verify" success success false skipped >/dev/null
+"$verify" success success true success success >/dev/null
+"$verify" success success false skipped skipped >/dev/null
 
 assert_verify_fails() {
   if "$verify" "$@" >/dev/null 2>&1; then
@@ -110,10 +110,12 @@ assert_verify_fails() {
   fi
 }
 
-assert_verify_fails success success true skipped
-assert_verify_fails success success false success
-assert_verify_fails success success "" skipped
-assert_verify_fails failure success true success
-assert_verify_fails success failure true success
+assert_verify_fails success success true skipped success
+assert_verify_fails success success true success skipped
+assert_verify_fails success success false success skipped
+assert_verify_fails success success false skipped success
+assert_verify_fails success success "" skipped skipped
+assert_verify_fails failure success true success success
+assert_verify_fails success failure true success success
 
 printf 'CI macOS path gate tests passed.\n'

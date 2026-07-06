@@ -3,6 +3,7 @@ import CodexBarCore
 import SwiftUI
 
 @MainActor
+@available(macOS 13.0, *)
 struct PlanUtilizationHistoryChartMenuView: View {
     private enum Layout {
         static let chartHeight: CGFloat = 130
@@ -818,6 +819,7 @@ struct PlanUtilizationHistoryChartMenuView: View {
     }
 }
 
+@available(macOS 13.0, *)
 extension PlanUtilizationHistoryChartMenuView {
     private nonisolated static func detailLine(point: Point?, windowMinutes: Int) -> String {
         guard let point else {

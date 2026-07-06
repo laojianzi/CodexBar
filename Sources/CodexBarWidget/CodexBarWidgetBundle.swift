@@ -3,13 +3,25 @@ import WidgetKit
 
 @main
 struct CodexBarWidgetBundle: WidgetBundle {
+    @WidgetBundleBuilder
     var body: some Widget {
         CodexBarSwitcherWidget()
-        CodexBarUsageWidget()
-        CodexBarHistoryWidget()
-        CodexBarCompactWidget()
-        CodexBarBurnDownWidget()
-        CodexBarCombinedBurnDownWidget()
+        if #available(macOS 14.0, *) {
+            CodexBarUsageWidget()
+            CodexBarHistoryWidget()
+            CodexBarCompactWidget()
+            CodexBarBurnDownWidget()
+            CodexBarCombinedBurnDownWidget()
+        } else {
+            LegacyCodexBarUsageWidget()
+            LegacyCodexBarHistoryWidget()
+            LegacyCodexBarCreditsWidget()
+            LegacyCodexBarTodayCostWidget()
+            LegacyCodexBarLast30DaysCostWidget()
+            LegacyCodexBarSessionBurnDownWidget()
+            LegacyCodexBarWeeklyBurnDownWidget()
+            LegacyCodexBarCombinedBurnDownWidget()
+        }
     }
 }
 
@@ -29,6 +41,135 @@ struct CodexBarSwitcherWidget: Widget {
     }
 }
 
+struct LegacyCodexBarUsageWidget: Widget {
+    private let kind = "CodexBarLegacyUsageWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(
+            kind: self.kind,
+            provider: LegacyCodexBarTimelineProvider())
+        { entry in
+            CodexBarUsageWidgetView(entry: entry)
+        }
+        .configurationDisplayName("CodexBar Usage")
+        .description("Session and weekly usage with credits and costs.")
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+    }
+}
+
+struct LegacyCodexBarHistoryWidget: Widget {
+    private let kind = "CodexBarLegacyHistoryWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(
+            kind: self.kind,
+            provider: LegacyCodexBarTimelineProvider())
+        { entry in
+            CodexBarHistoryWidgetView(entry: entry)
+        }
+        .configurationDisplayName("CodexBar History")
+        .description("Usage history chart with recent totals.")
+        .supportedFamilies([.systemMedium, .systemLarge])
+    }
+}
+
+struct LegacyCodexBarCreditsWidget: Widget {
+    private let kind = "CodexBarLegacyCreditsWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(
+            kind: self.kind,
+            provider: LegacyCodexBarCompactTimelineProvider(metric: .credits))
+        { entry in
+            CodexBarCompactWidgetView(entry: entry)
+        }
+        .configurationDisplayName("CodexBar Credits")
+        .description("Compact widget for credits remaining.")
+        .supportedFamilies([.systemSmall])
+    }
+}
+
+struct LegacyCodexBarTodayCostWidget: Widget {
+    private let kind = "CodexBarLegacyTodayCostWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(
+            kind: self.kind,
+            provider: LegacyCodexBarCompactTimelineProvider(metric: .todayCost))
+        { entry in
+            CodexBarCompactWidgetView(entry: entry)
+        }
+        .configurationDisplayName("CodexBar Today Cost")
+        .description("Compact widget for current session cost.")
+        .supportedFamilies([.systemSmall])
+    }
+}
+
+struct LegacyCodexBarLast30DaysCostWidget: Widget {
+    private let kind = "CodexBarLegacyLast30DaysCostWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(
+            kind: self.kind,
+            provider: LegacyCodexBarCompactTimelineProvider(metric: .last30DaysCost))
+        { entry in
+            CodexBarCompactWidgetView(entry: entry)
+        }
+        .configurationDisplayName("CodexBar 30d Cost")
+        .description("Compact widget for recent total cost.")
+        .supportedFamilies([.systemSmall])
+    }
+}
+
+struct LegacyCodexBarSessionBurnDownWidget: Widget {
+    private let kind = "CodexBarLegacySessionBurnDownWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(
+            kind: self.kind,
+            provider: LegacyBurnDownTimelineProvider(window: .session))
+        { entry in
+            LegacyBurnDownWidgetView(entry: entry)
+        }
+        .configurationDisplayName("CodexBar Session Burn Down")
+        .description("Session budget compared with remaining time.")
+        .supportedFamilies([.systemMedium])
+    }
+}
+
+struct LegacyCodexBarWeeklyBurnDownWidget: Widget {
+    private let kind = "CodexBarLegacyWeeklyBurnDownWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(
+            kind: self.kind,
+            provider: LegacyBurnDownTimelineProvider(window: .weekly))
+        { entry in
+            LegacyBurnDownWidgetView(entry: entry)
+        }
+        .configurationDisplayName("CodexBar Weekly Burn Down")
+        .description("Weekly budget compared with remaining time.")
+        .supportedFamilies([.systemMedium])
+    }
+}
+
+struct LegacyCodexBarCombinedBurnDownWidget: Widget {
+    private let kind = "CodexBarLegacyCombinedBurnDownWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(
+            kind: self.kind,
+            provider: LegacyCombinedBurnDownTimelineProvider())
+        { entry in
+            LegacyCombinedBurnDownWidgetView(entry: entry)
+        }
+        .configurationDisplayName("CodexBar Burn Down (Combined)")
+        .description("Session and weekly burn-down status in one tile.")
+        .supportedFamilies([.systemMedium])
+    }
+}
+
+@available(macOS 14.0, *)
 struct CodexBarUsageWidget: Widget {
     private let kind = "CodexBarUsageWidget"
 
@@ -46,6 +187,7 @@ struct CodexBarUsageWidget: Widget {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarHistoryWidget: Widget {
     private let kind = "CodexBarHistoryWidget"
 
@@ -63,6 +205,7 @@ struct CodexBarHistoryWidget: Widget {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarCompactWidget: Widget {
     private let kind = "CodexBarCompactWidget"
 
@@ -80,6 +223,7 @@ struct CodexBarCompactWidget: Widget {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarBurnDownWidget: Widget {
     private let kind = "CodexBarBurnDownWidget"
 
@@ -97,6 +241,7 @@ struct CodexBarBurnDownWidget: Widget {
     }
 }
 
+@available(macOS 14.0, *)
 struct CodexBarCombinedBurnDownWidget: Widget {
     private let kind = "CodexBarCombinedBurnDownWidget"
 

@@ -35,5 +35,7 @@ if resolve_package_signing_mode 2>/dev/null; then
 fi
 
 grep -Fq 'CODEXBAR_SIGNING=identity ./Scripts/package_app.sh release' "$RELEASE_SCRIPT"
+grep -Fq 'com.apple.security.cs.disable-library-validation' "$PACKAGE_SCRIPT"
+grep -Fq '[[ "$SIGNING_MODE" == "adhoc" ]]' "$PACKAGE_SCRIPT"
 
 echo "Package signing tests passed."

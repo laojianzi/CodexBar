@@ -60,8 +60,8 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
 @MainActor
 struct GeneralPane: View {
-    @Bindable var settings: SettingsStore
-    @Bindable var store: UsageStore
+    @ObservedObject var settings: SettingsStore
+    @ObservedObject var store: UsageStore
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
@@ -283,7 +283,7 @@ struct GeneralPane: View {
 
 @MainActor
 struct CostHistoryDaysEditor: View {
-    @Bindable var settings: SettingsStore
+    @ObservedObject var settings: SettingsStore
 
     static func title(days: Int) -> String {
         String(format: L("cost_history_days_title"), days)

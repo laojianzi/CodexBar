@@ -362,6 +362,21 @@ extension StatusItemController {
             return true
         }
 
+        guard #available(macOS 13.0, *) else {
+            let chartView = LegacyUsageBreakdownMenuView(breakdown: breakdown, width: width)
+            let hosting = MenuHostingView(rootView: chartView)
+            hosting.frame = NSRect(
+                origin: .zero,
+                size: NSSize(width: width, height: self.hostedSubviewFittingHeight(for: hosting, width: width)))
+
+            let chartItem = NSMenuItem()
+            chartItem.view = hosting
+            chartItem.isEnabled = true
+            chartItem.representedObject = Self.usageBreakdownChartID
+            submenu.addItem(chartItem)
+            return true
+        }
+
         let chartView = UsageBreakdownChartMenuView(breakdown: breakdown, width: width)
         let hosting = MenuHostingView(rootView: chartView)
         hosting.frame = NSRect(
@@ -383,6 +398,21 @@ extension StatusItemController {
 
         if !self.menuCardRenderingEnabledForController {
             let chartItem = NSMenuItem()
+            chartItem.isEnabled = true
+            chartItem.representedObject = Self.creditsHistoryChartID
+            submenu.addItem(chartItem)
+            return true
+        }
+
+        guard #available(macOS 13.0, *) else {
+            let chartView = LegacyCreditsHistoryMenuView(breakdown: breakdown, width: width)
+            let hosting = MenuHostingView(rootView: chartView)
+            hosting.frame = NSRect(
+                origin: .zero,
+                size: NSSize(width: width, height: self.hostedSubviewFittingHeight(for: hosting, width: width)))
+
+            let chartItem = NSMenuItem()
+            chartItem.view = hosting
             chartItem.isEnabled = true
             chartItem.representedObject = Self.creditsHistoryChartID
             submenu.addItem(chartItem)
@@ -414,6 +444,29 @@ extension StatusItemController {
 
         if !self.menuCardRenderingEnabledForController {
             let chartItem = NSMenuItem()
+            chartItem.isEnabled = true
+            chartItem.representedObject = Self.costHistoryChartID
+            chartItem.toolTip = provider.rawValue
+            submenu.addItem(chartItem)
+            return true
+        }
+
+        guard #available(macOS 13.0, *) else {
+            let chartView = LegacyCostHistoryMenuView(
+                provider: provider,
+                daily: tokenSnapshot.daily,
+                totalCostUSD: tokenSnapshot.last30DaysCostUSD,
+                currencyCode: tokenSnapshot.currencyCode,
+                historyDays: tokenSnapshot.historyDays,
+                windowLabel: tokenSnapshot.historyLabel,
+                width: width)
+            let hosting = MenuHostingView(rootView: chartView)
+            hosting.frame = NSRect(
+                origin: .zero,
+                size: NSSize(width: width, height: self.hostedSubviewFittingHeight(for: hosting, width: width)))
+
+            let chartItem = NSMenuItem()
+            chartItem.view = hosting
             chartItem.isEnabled = true
             chartItem.representedObject = Self.costHistoryChartID
             chartItem.toolTip = provider.rawValue

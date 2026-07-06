@@ -49,6 +49,26 @@ extension StatusItemController {
             return true
         }
 
+        guard #available(macOS 13.0, *) else {
+            let chartView = LegacyPlanUtilizationHistoryMenuView(
+                provider: provider,
+                histories: histories,
+                snapshot: snapshot,
+                width: width)
+            let hosting = UsageHistoryMenuHostingView(rootView: chartView)
+            hosting.frame = NSRect(
+                origin: .zero,
+                size: NSSize(width: width, height: self.hostedSubviewFittingHeight(for: hosting, width: width)))
+
+            let chartItem = NSMenuItem()
+            chartItem.view = hosting
+            chartItem.isEnabled = true
+            chartItem.representedObject = Self.usageHistoryChartID
+            chartItem.toolTip = provider.rawValue
+            submenu.addItem(chartItem)
+            return true
+        }
+
         let chartView = PlanUtilizationHistoryChartMenuView(
             provider: provider,
             histories: histories,

@@ -3,6 +3,7 @@ import CodexBarCore
 import SwiftUI
 
 @MainActor
+@available(macOS 13.0, *)
 struct CostHistoryChartMenuView: View {
     typealias DailyEntry = CostUsageDailyReport.Entry
 
@@ -585,6 +586,7 @@ struct CostHistoryChartMenuView: View {
     }
 }
 
+@available(macOS 13.0, *)
 extension CostHistoryChartMenuView {
     static func _defaultSelectedDateKeyForTesting(provider: UsageProvider, daily: [DailyEntry]) -> String? {
         self.defaultSelectedDateKey(model: self.makeModel(provider: provider, daily: daily))

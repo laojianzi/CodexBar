@@ -3,6 +3,7 @@ import CodexBarCore
 import SwiftUI
 
 @MainActor
+@available(macOS 13.0, *)
 struct UsageBreakdownChartMenuView: View {
     private struct Point: Identifiable {
         let id: String

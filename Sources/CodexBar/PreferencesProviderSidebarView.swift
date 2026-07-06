@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 struct ProviderSidebarListView: View {
     let providers: [UsageProvider]
     let orderedProviders: [UsageProvider]
-    @Bindable var store: UsageStore
+    @ObservedObject var store: UsageStore
     let isEnabled: (UsageProvider) -> Binding<Bool>
     let subtitle: (UsageProvider) -> String
     @Binding var searchText: String
@@ -143,7 +143,7 @@ private struct ProviderSidebarSortToggle: View {
 @MainActor
 private struct ProviderSidebarRowView: View {
     let provider: UsageProvider
-    @Bindable var store: UsageStore
+    @ObservedObject var store: UsageStore
     @Binding var isEnabled: Bool
     let subtitle: String
     let isSelected: Bool

@@ -22,7 +22,7 @@ let package = Package(
     name: "CodexBar",
     defaultLocalization: "en",
     platforms: [
-        .macOS(.v14),
+        .macOS(.v12),
     ],
     products: {
         var products: [Product] = [

@@ -3,6 +3,7 @@ import SwiftUI
 import Testing
 @testable import CodexBar
 
+@available(macOS 13.0, *)
 struct CostHistoryChartMenuViewTests {
     @Test
     @MainActor

@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor
 struct GlobalQuotaWarningSettingsView: View {
-    @Bindable var settings: SettingsStore
+    @ObservedObject var settings: SettingsStore
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -59,7 +59,7 @@ struct GlobalQuotaWarningSettingsView: View {
 @MainActor
 struct ProviderQuotaWarningSettingsView: View {
     let provider: UsageProvider
-    @Bindable var settings: SettingsStore
+    @ObservedObject var settings: SettingsStore
 
     var body: some View {
         ProviderSettingsSection(title: L("quota_warnings_title")) {
@@ -193,7 +193,7 @@ private struct QuotaWarningThresholdField: View {
                     .textFieldStyle(.roundedBorder)
                     .font(.footnote)
                     .frame(width: 56)
-                    .onChange(of: self.upperText) { _, value in
+                    .onChange(of: self.upperText) { value in
                         self.upperText = Self.filteredIntegerText(value)
                     }
                     .onSubmit { self.commit() }
@@ -206,7 +206,7 @@ private struct QuotaWarningThresholdField: View {
                     .textFieldStyle(.roundedBorder)
                     .font(.footnote)
                     .frame(width: 56)
-                    .onChange(of: self.lowerText) { _, value in
+                    .onChange(of: self.lowerText) { value in
                         self.lowerText = Self.filteredIntegerText(value)
                     }
                     .onSubmit { self.commit() }
@@ -223,7 +223,7 @@ private struct QuotaWarningThresholdField: View {
             }
         }
         .onAppear { self.updateText(from: self.thresholds()) }
-        .onChange(of: self.thresholds()) { _, value in
+        .onChange(of: self.thresholds()) { value in
             self.updateText(from: value)
         }
     }

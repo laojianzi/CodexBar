@@ -1,5 +1,5 @@
 import CodexBarCore
-import Observation
+import Combine
 
 struct MenuCardLiveSubtitle {
     let text: String
@@ -8,12 +8,11 @@ struct MenuCardLiveSubtitle {
 
 /// Updates values in an already-hosted card without rebuilding its tracked NSMenu.
 @MainActor
-@Observable
-final class MenuCardRefreshMonitor {
+final class MenuCardRefreshMonitor: ObservableObject {
     typealias ModelResolver = @MainActor (UsageProvider) -> UsageMenuCardView.Model?
 
     private let resolveModel: ModelResolver
-    var isManualRefreshInFlight = false
+    @Published var isManualRefreshInFlight = false
     private var manualRefreshProvider: UsageProvider?
     private var frozenManualRefreshModels: [UsageProvider: UsageMenuCardView.Model] = [:]
 

@@ -1,7 +1,6 @@
 import AppKit
 import CodexBarCore
 import KeyboardShortcuts
-import Observation
 import QuartzCore
 import Security
 import SwiftUI
@@ -9,10 +8,10 @@ import SwiftUI
 @main
 struct CodexBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-    @State private var settings: SettingsStore
-    @State private var store: UsageStore
-    @State private var managedCodexAccountCoordinator: ManagedCodexAccountCoordinator
-    @State private var codexAccountPromotionCoordinator: CodexAccountPromotionCoordinator
+    @StateObject private var settings: SettingsStore
+    @StateObject private var store: UsageStore
+    @StateObject private var managedCodexAccountCoordinator: ManagedCodexAccountCoordinator
+    @StateObject private var codexAccountPromotionCoordinator: CodexAccountPromotionCoordinator
     private let preferencesSelection: PreferencesSelection
     private let account: AccountInfo
 
@@ -62,10 +61,10 @@ struct CodexBarApp: App {
             usageStore: store,
             managedAccountCoordinator: managedCodexAccountCoordinator)
         self.preferencesSelection = preferencesSelection
-        _settings = State(wrappedValue: settings)
-        _store = State(wrappedValue: store)
-        _managedCodexAccountCoordinator = State(wrappedValue: managedCodexAccountCoordinator)
-        _codexAccountPromotionCoordinator = State(wrappedValue: codexAccountPromotionCoordinator)
+        _settings = StateObject(wrappedValue: settings)
+        _store = StateObject(wrappedValue: store)
+        _managedCodexAccountCoordinator = StateObject(wrappedValue: managedCodexAccountCoordinator)
+        _codexAccountPromotionCoordinator = StateObject(wrappedValue: codexAccountPromotionCoordinator)
         self.account = account
         CodexBarLog.setLogLevel(settings.debugLogLevel)
         self.appDelegate.configure(.init(
@@ -84,7 +83,7 @@ struct CodexBarApp: App {
         WindowGroup("CodexBarLifecycleKeepalive") {
             HiddenWindowView()
         }
-        .defaultSize(width: 20, height: 20)
+        .codexDefaultSize(width: 20, height: 20)
         .windowStyle(.hiddenTitleBar)
 
         Settings {
@@ -99,8 +98,8 @@ struct CodexBarApp: App {
                     await self.appDelegate.runProviderLoginFlow(provider)
                 })
         }
-        .defaultSize(width: PreferencesTab.general.preferredWidth, height: PreferencesTab.general.preferredHeight)
-        .windowResizability(.contentSize)
+        .codexDefaultSize(width: PreferencesTab.general.preferredWidth, height: PreferencesTab.general.preferredHeight)
+        .codexWindowResizabilityContentSize()
     }
 
     private func openSettings(tab: PreferencesTab) {
@@ -115,6 +114,26 @@ struct CodexBarApp: App {
             UserDefaults.standard.removeObject(forKey: "AppleLanguages")
         } else {
             UserDefaults.standard.set([language], forKey: "AppleLanguages")
+        }
+    }
+}
+
+extension Scene {
+    @SceneBuilder
+    fileprivate func codexDefaultSize(width: CGFloat, height: CGFloat) -> some Scene {
+        if #available(macOS 13.0, *) {
+            self.defaultSize(width: width, height: height)
+        } else {
+            self
+        }
+    }
+
+    @SceneBuilder
+    fileprivate func codexWindowResizabilityContentSize() -> some Scene {
+        if #available(macOS 13.0, *) {
+            self.windowResizability(.contentSize)
+        } else {
+            self
         }
     }
 }
@@ -149,10 +168,9 @@ final class DisabledUpdaterController: UpdaterProviding {
 }
 
 @MainActor
-@Observable
-final class UpdateStatus {
+final class UpdateStatus: ObservableObject {
     static let disabled = UpdateStatus()
-    var isUpdateReady: Bool
+    @Published var isUpdateReady: Bool
 
     init(isUpdateReady: Bool = false) {
         self.isUpdateReady = isUpdateReady

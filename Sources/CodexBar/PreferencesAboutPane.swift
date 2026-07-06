@@ -127,7 +127,7 @@ struct AboutPane: View {
             self.updater.automaticallyDownloadsUpdates = self.autoUpdateEnabled
             self.didLoadUpdaterState = true
         }
-        .onChange(of: self.autoUpdateEnabled) { _, newValue in
+        .onChange(of: self.autoUpdateEnabled) { newValue in
             self.updater.automaticallyChecksForUpdates = newValue
             self.updater.automaticallyDownloadsUpdates = newValue
         }

@@ -16,9 +16,11 @@ struct UsageMenuCardLayoutTests {
         let headerSize = NSHostingController(rootView: UsageMenuCardHeaderSectionView(
             model: model,
             showDivider: false,
-            width: width))
+            width: width)
+            .environmentObject(MenuCardRefreshMonitor { _ in nil }))
             .sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude))
-        let cardSize = NSHostingController(rootView: UsageMenuCardView(model: model, width: width))
+        let cardSize = NSHostingController(rootView: UsageMenuCardView(model: model, width: width)
+            .environmentObject(MenuCardRefreshMonitor { _ in nil }))
             .sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude))
 
         #expect(headerSize.height > 0)
@@ -42,13 +44,15 @@ struct UsageMenuCardLayoutTests {
         ])
         let width: CGFloat = 296
 
-        let fullCardSize = NSHostingController(rootView: UsageMenuCardView(model: model, width: width))
+        let fullCardSize = NSHostingController(rootView: UsageMenuCardView(model: model, width: width)
+            .environmentObject(MenuCardRefreshMonitor { _ in nil }))
             .sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude))
         let overviewStyleSize = NSHostingController(rootView: UsageMenuCardHeaderAndUsageSectionView(
             model: model,
             layoutModel: model,
             bottomPadding: UsageMenuCardLayout.sectionBottomPadding,
-            width: width))
+            width: width)
+            .environmentObject(MenuCardRefreshMonitor { _ in nil }))
             .sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude))
 
         #expect(UsageMenuCardLayout.postHeaderDividerContentSpacing == 16)

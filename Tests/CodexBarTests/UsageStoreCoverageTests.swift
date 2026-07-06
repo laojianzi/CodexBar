@@ -1,6 +1,6 @@
 import CodexBarCore
+import Combine
 import Foundation
-import Observation
 import Testing
 @testable import CodexBar
 
@@ -601,9 +601,7 @@ struct UsageStoreCoverageTests {
         let store = Self.makeUsageStore(settings: settings)
         let didChange = ObservationFlag()
 
-        withObservationTracking {
-            _ = store.backgroundWorkSettingsObservationToken
-        } onChange: {
+        let cancellable = settings.objectWillChange.sink { _ in
             didChange.set()
         }
 
@@ -612,15 +610,15 @@ struct UsageStoreCoverageTests {
         #expect(didChange.get() == false)
 
         let refreshDidChange = ObservationFlag()
-        withObservationTracking {
-            _ = store.backgroundWorkSettingsObservationToken
-        } onChange: {
+        let refreshCancellable = settings.objectWillChange.sink { _ in
             refreshDidChange.set()
         }
 
         settings.refreshFrequency = .oneMinute
         try? await Task.sleep(nanoseconds: 50_000_000)
         #expect(refreshDidChange.get() == true)
+        _ = cancellable
+        _ = refreshCancellable
     }
 
     @Test

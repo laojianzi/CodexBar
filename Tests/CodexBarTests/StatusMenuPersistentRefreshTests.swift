@@ -714,7 +714,7 @@ struct StatusMenuPersistentRefreshTests {
 
         func fittingHeight(for model: UsageMenuCardView.Model) -> CGFloat {
             NSHostingView(rootView: UsageMenuCardView(model: model, width: 320)
-                .environment(\.menuCardRefreshMonitor, controller.menuCardRefreshMonitor))
+                .environmentObject(controller.menuCardRefreshMonitor))
                 .fittingSize.height
         }
 

@@ -1,19 +1,18 @@
 import CodexBarCore
+import Combine
 import Foundation
-import Observation
 
 enum ManagedCodexAccountCoordinatorError: Error, Equatable {
     case authenticationInProgress
 }
 
 @MainActor
-@Observable
-final class ManagedCodexAccountCoordinator {
+final class ManagedCodexAccountCoordinator: ObservableObject {
     let service: ManagedCodexAccountService
-    private(set) var isAuthenticatingManagedAccount: Bool = false
-    private(set) var authenticatingManagedAccountID: UUID?
-    private(set) var isRemovingManagedAccount: Bool = false
-    private(set) var removingManagedAccountID: UUID?
+    @Published private(set) var isAuthenticatingManagedAccount: Bool = false
+    @Published private(set) var authenticatingManagedAccountID: UUID?
+    @Published private(set) var isRemovingManagedAccount: Bool = false
+    @Published private(set) var removingManagedAccountID: UUID?
     var onManagedAccountsDidChange: (@MainActor () -> Void)?
 
     var hasConflictingManagedAccountOperationInFlight: Bool {

@@ -3,7 +3,8 @@ import Foundation
 import Testing
 @testable import CodexBar
 
-// swiftlint:disable:next type_body_length
+// swiftlint:disable type_body_length
+@available(macOS 13.0, *)
 struct UsageStorePlanUtilizationTests {
     @Test
     func `coalesces changed usage within hour into single entry`() throws {
@@ -1062,6 +1063,8 @@ struct UsageStorePlanUtilizationTests {
         #expect(loaded == [.codex: buckets])
     }
 }
+
+// swiftlint:enable type_body_length
 
 extension UsageStorePlanUtilizationTests {
     private struct PersistedFixtureDocument: Codable {

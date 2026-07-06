@@ -124,7 +124,7 @@ struct UsageMenuCardView: View {
     var layoutModel: Model?
     let width: CGFloat
     @Environment(\.menuItemHighlighted) private var isHighlighted
-    @Environment(\.menuCardRefreshMonitor) private var refreshMonitor
+    @EnvironmentObject private var refreshMonitor: MenuCardRefreshMonitor
 
     static func popupMetricTitle(provider: UsageProvider, metric: Model.Metric) -> String {
         if provider == .openrouter, metric.id == "primary" {
@@ -239,7 +239,7 @@ struct UsageMenuCardView: View {
 
     private var liveModel: Model {
         guard self.model.usesLiveSubtitle else { return self.model }
-        return self.refreshMonitor?.model(for: self.model.provider, fallback: self.model) ?? self.model
+        return self.refreshMonitor.model(for: self.model.provider, fallback: self.model)
     }
 
     private static func hasDetails(for model: Model) -> Bool {
@@ -257,7 +257,7 @@ struct UsageMenuCardView: View {
 private struct UsageMenuCardHeaderView: View {
     let model: UsageMenuCardView.Model
     @Environment(\.menuItemHighlighted) private var isHighlighted
-    @Environment(\.menuCardRefreshMonitor) private var refreshMonitor
+    @EnvironmentObject private var refreshMonitor: MenuCardRefreshMonitor
 
     var body: some View {
         VStack(alignment: .leading, spacing: UsageMenuCardLayout.headerLineSpacing) {
@@ -324,7 +324,7 @@ private struct UsageMenuCardHeaderView: View {
     private var liveSubtitle: MenuCardLiveSubtitle {
         let fallback = MenuCardLiveSubtitle(text: self.model.subtitleText, style: self.model.subtitleStyle)
         guard self.model.usesLiveSubtitle else { return fallback }
-        return self.refreshMonitor?.subtitle(for: self.model.provider, fallback: fallback) ?? fallback
+        return self.refreshMonitor.subtitle(for: self.model.provider, fallback: fallback)
     }
 
     private func subtitleColor(for style: UsageMenuCardView.Model.SubtitleStyle) -> Color {
@@ -580,7 +580,7 @@ struct UsageMenuCardUsageSectionView: View {
     let showBottomDivider: Bool
     let bottomPadding: CGFloat
     let width: CGFloat
-    @Environment(\.menuCardRefreshMonitor) private var refreshMonitor
+    @EnvironmentObject private var refreshMonitor: MenuCardRefreshMonitor
 
     var body: some View {
         let liveModel = self.liveModel
@@ -593,7 +593,7 @@ struct UsageMenuCardUsageSectionView: View {
 
     private var liveModel: UsageMenuCardView.Model {
         guard self.model.usesLiveSubtitle else { return self.model }
-        return self.refreshMonitor?.model(for: self.model.provider, fallback: self.model) ?? self.model
+        return self.refreshMonitor.model(for: self.model.provider, fallback: self.model)
     }
 }
 
@@ -603,7 +603,7 @@ struct UsageMenuCardCreditsSectionView: View {
     let topPadding: CGFloat
     let bottomPadding: CGFloat
     let width: CGFloat
-    @Environment(\.menuCardRefreshMonitor) private var refreshMonitor
+    @EnvironmentObject private var refreshMonitor: MenuCardRefreshMonitor
 
     var body: some View {
         let liveModel = self.liveModel
@@ -630,7 +630,7 @@ struct UsageMenuCardCreditsSectionView: View {
 
     private var liveModel: UsageMenuCardView.Model {
         guard self.model.usesLiveSubtitle else { return self.model }
-        return self.refreshMonitor?.model(for: self.model.provider, fallback: self.model) ?? self.model
+        return self.refreshMonitor.model(for: self.model.provider, fallback: self.model)
     }
 }
 
@@ -701,7 +701,7 @@ struct UsageMenuCardCostSectionView: View {
     let bottomPadding: CGFloat
     let width: CGFloat
     @Environment(\.menuItemHighlighted) private var isHighlighted
-    @Environment(\.menuCardRefreshMonitor) private var refreshMonitor
+    @EnvironmentObject private var refreshMonitor: MenuCardRefreshMonitor
 
     var body: some View {
         let liveModel = self.liveModel
@@ -750,7 +750,7 @@ struct UsageMenuCardCostSectionView: View {
 
     private var liveModel: UsageMenuCardView.Model {
         guard self.model.usesLiveSubtitle else { return self.model }
-        return self.refreshMonitor?.model(for: self.model.provider, fallback: self.model) ?? self.model
+        return self.refreshMonitor.model(for: self.model.provider, fallback: self.model)
     }
 }
 
@@ -759,7 +759,7 @@ struct UsageMenuCardExtraUsageSectionView: View {
     let topPadding: CGFloat
     let bottomPadding: CGFloat
     let width: CGFloat
-    @Environment(\.menuCardRefreshMonitor) private var refreshMonitor
+    @EnvironmentObject private var refreshMonitor: MenuCardRefreshMonitor
 
     var body: some View {
         let liveModel = self.liveModel
@@ -778,7 +778,7 @@ struct UsageMenuCardExtraUsageSectionView: View {
 
     private var liveModel: UsageMenuCardView.Model {
         guard self.model.usesLiveSubtitle else { return self.model }
-        return self.refreshMonitor?.model(for: self.model.provider, fallback: self.model) ?? self.model
+        return self.refreshMonitor.model(for: self.model.provider, fallback: self.model)
     }
 }
 

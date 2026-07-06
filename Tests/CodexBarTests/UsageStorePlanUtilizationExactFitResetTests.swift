@@ -3,6 +3,7 @@ import Foundation
 import Testing
 @testable import CodexBar
 
+@available(macOS 13.0, *)
 struct UsageStorePlanUtilizationExactFitResetTests {
     @MainActor
     @Test

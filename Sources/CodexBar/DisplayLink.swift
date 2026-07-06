@@ -1,16 +1,15 @@
 import AppKit
+import Combine
 import CoreVideo
-import Observation
 import QuartzCore
 
 /// Minimal display link driver using NSScreen.displayLink on macOS 15+,
 /// and CVDisplayLink on macOS 14.
 /// Publishes ticks on the main thread at the requested frame rate.
 @MainActor
-@Observable
-final class DisplayLinkDriver {
+final class DisplayLinkDriver: ObservableObject {
     // Published counter used to drive SwiftUI updates.
-    var tick: Int = 0
+    @Published var tick: Int = 0
     private var displayLink: CADisplayLink?
     private var cvDisplayLink: CVDisplayLink?
     private var targetInterval: CFTimeInterval = 1.0 / 60.0

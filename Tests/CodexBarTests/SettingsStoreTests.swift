@@ -1,6 +1,6 @@
 import CodexBarCore
+import Combine
 import Foundation
-import Observation
 import Testing
 @testable import CodexBar
 
@@ -1169,9 +1169,7 @@ struct SettingsStoreTests {
 
         let didChange = ObservationFlag()
 
-        withObservationTracking {
-            _ = store.menuObservationToken
-        } onChange: {
+        let cancellable = store.objectWillChange.sink { _ in
             didChange.set()
         }
 
@@ -1179,6 +1177,7 @@ struct SettingsStoreTests {
         try? await Task.sleep(nanoseconds: 50_000_000)
 
         #expect(didChange.get() == true)
+        _ = cancellable
     }
 
     @Test
@@ -1196,9 +1195,7 @@ struct SettingsStoreTests {
 
         let didChange = ObservationFlag()
 
-        withObservationTracking {
-            _ = store.menuObservationToken
-        } onChange: {
+        let cancellable = store.objectWillChange.sink { _ in
             didChange.set()
         }
 
@@ -1206,6 +1203,7 @@ struct SettingsStoreTests {
         try? await Task.sleep(nanoseconds: 50_000_000)
 
         #expect(didChange.get() == true)
+        _ = cancellable
     }
 
     @Test
@@ -1223,9 +1221,7 @@ struct SettingsStoreTests {
 
         let didChange = ObservationFlag()
 
-        withObservationTracking {
-            _ = store.menuObservationToken
-        } onChange: {
+        let cancellable = store.objectWillChange.sink { _ in
             didChange.set()
         }
 
@@ -1234,6 +1230,7 @@ struct SettingsStoreTests {
         try? await Task.sleep(nanoseconds: 50_000_000)
 
         #expect(didChange.get() == false)
+        _ = cancellable
     }
 
     @Test
@@ -1254,9 +1251,7 @@ struct SettingsStoreTests {
             thresholds: [Int]) async
         {
             let didChange = ObservationFlag()
-            withObservationTracking {
-                _ = store.menuObservationToken
-            } onChange: {
+            let cancellable = store.objectWillChange.sink { _ in
                 didChange.set()
             }
 
@@ -1264,6 +1259,7 @@ struct SettingsStoreTests {
             try? await Task.sleep(nanoseconds: 50_000_000)
 
             #expect(didChange.get() == true)
+            _ = cancellable
         }
 
         await expectObservation(for: .session, thresholds: [70, 30])
@@ -1285,9 +1281,7 @@ struct SettingsStoreTests {
 
         let didChange = ObservationFlag()
 
-        withObservationTracking {
-            _ = store.menuObservationToken
-        } onChange: {
+        let cancellable = store.objectWillChange.sink { _ in
             didChange.set()
         }
 
@@ -1295,6 +1289,7 @@ struct SettingsStoreTests {
         try? await Task.sleep(nanoseconds: 50_000_000)
 
         #expect(didChange.get() == true)
+        _ = cancellable
     }
 
     @Test
@@ -1312,9 +1307,7 @@ struct SettingsStoreTests {
 
         let didChange = ObservationFlag()
 
-        withObservationTracking {
-            _ = store.codexCookieSource
-        } onChange: {
+        let cancellable = store.objectWillChange.sink { _ in
             didChange.set()
         }
 
@@ -1322,6 +1315,7 @@ struct SettingsStoreTests {
         try? await Task.sleep(nanoseconds: 50_000_000)
 
         #expect(didChange.get() == true)
+        _ = cancellable
     }
 
     @Test
@@ -1339,9 +1333,7 @@ struct SettingsStoreTests {
 
         let didChange = ObservationFlag()
 
-        withObservationTracking {
-            _ = store.menuObservationToken
-        } onChange: {
+        let cancellable = store.objectWillChange.sink { _ in
             didChange.set()
         }
 
@@ -1349,6 +1341,7 @@ struct SettingsStoreTests {
         try? await Task.sleep(nanoseconds: 50_000_000)
 
         #expect(didChange.get() == true)
+        _ = cancellable
     }
 
     @Test

@@ -119,10 +119,9 @@ struct StorageBreakdownMenuView: View {
     }
 
     var body: some View {
-        ScrollView(.vertical) {
+        ScrollView(.vertical, showsIndicators: true) {
             self.content
         }
-        .scrollIndicators(.visible)
         .frame(
             minWidth: self.width,
             idealWidth: self.width,
