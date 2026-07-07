@@ -93,7 +93,7 @@ struct LegacyCreditsHistoryMenuView: View {
         }
     }
 
-    fileprivate static func axisLabel(_ key: String) -> String {
+    static func axisLabel(_ key: String) -> String {
         guard let date = dateFromDayKey(key) else { return key }
         return date.formatted(.dateTime.month(.abbreviated).day())
     }

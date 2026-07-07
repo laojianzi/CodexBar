@@ -118,15 +118,6 @@ struct OpenMenuShortcutRecorder: NSViewRepresentable {
         nsView.shortcutName = .openMenu
     }
 
-    func sizeThatFits(
-        _: ProposedViewSize,
-        nsView: KeyboardShortcuts.RecorderCocoa,
-        context: Context)
-        -> CGSize?
-    {
-        Self.fittedSize(intrinsicHeight: nsView.intrinsicContentSize.height)
-    }
-
     static func fittedSize(intrinsicHeight: CGFloat) -> CGSize {
         CGSize(width: self.preferredWidth, height: intrinsicHeight)
     }

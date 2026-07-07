@@ -3,14 +3,23 @@ import Combine
 import CoreVideo
 import QuartzCore
 
+@available(macOS 14, *)
+private final class NativeDisplayLinkBox {
+    let displayLink: CADisplayLink
+
+    init(_ displayLink: CADisplayLink) {
+        self.displayLink = displayLink
+    }
+}
+
 /// Minimal display link driver using NSScreen.displayLink on macOS 15+,
-/// and CVDisplayLink on macOS 14.
+/// and CVDisplayLink on earlier systems.
 /// Publishes ticks on the main thread at the requested frame rate.
 @MainActor
 final class DisplayLinkDriver: ObservableObject {
     // Published counter used to drive SwiftUI updates.
     @Published var tick: Int = 0
-    private var displayLink: CADisplayLink?
+    private var nativeDisplayLinkBox: Any?
     private var cvDisplayLink: CVDisplayLink?
     private var targetInterval: CFTimeInterval = 1.0 / 60.0
     private var lastTickTimestamp: CFTimeInterval = 0
@@ -21,12 +30,11 @@ final class DisplayLinkDriver: ObservableObject {
     }
 
     func start(fps: Double = 12) {
-        guard self.displayLink == nil, self.cvDisplayLink == nil else { return }
+        guard self.nativeDisplayLinkBox == nil, self.cvDisplayLink == nil else { return }
         let clampedFps = max(fps, 1)
         self.targetInterval = 1.0 / clampedFps
         self.lastTickTimestamp = 0
         if #available(macOS 15, *), let screen = NSScreen.main {
-            // NSScreen.displayLink is macOS 15+ only.
             let displayLink = screen.displayLink(target: self, selector: #selector(self.step))
             let rate = Float(clampedFps)
             displayLink.preferredFrameRateRange = CAFrameRateRange(
@@ -34,15 +42,17 @@ final class DisplayLinkDriver: ObservableObject {
                 maximum: rate,
                 preferred: rate)
             displayLink.add(to: .main, forMode: .common)
-            self.displayLink = displayLink
+            self.nativeDisplayLinkBox = NativeDisplayLinkBox(displayLink)
         } else {
             self.startCVDisplayLink()
         }
     }
 
     func stop() {
-        self.displayLink?.invalidate()
-        self.displayLink = nil
+        if #available(macOS 14, *), let box = self.nativeDisplayLinkBox as? NativeDisplayLinkBox {
+            box.displayLink.invalidate()
+        }
+        self.nativeDisplayLinkBox = nil
         if let cvDisplayLink = self.cvDisplayLink {
             CVDisplayLinkStop(cvDisplayLink)
         }
