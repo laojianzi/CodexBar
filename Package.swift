@@ -2,7 +2,15 @@
 import Foundation
 import PackageDescription
 
-let sweetCookieKitPath = "../SweetCookieKit"
+let commanderPath = ProcessInfo.processInfo.environment["CODEXBAR_COMMANDER_PATH"] ?? "../Commander"
+let useLocalCommander =
+    ProcessInfo.processInfo.environment["CODEXBAR_USE_LOCAL_COMMANDER"] == "1"
+let commanderDependency: Package.Dependency =
+    useLocalCommander && FileManager.default.fileExists(atPath: commanderPath)
+    ? .package(path: commanderPath)
+    : .package(url: "https://github.com/steipete/Commander", from: "0.2.1")
+
+let sweetCookieKitPath = ProcessInfo.processInfo.environment["CODEXBAR_SWEETCOOKIEKIT_PATH"] ?? "../SweetCookieKit"
 let useLocalSweetCookieKit =
     ProcessInfo.processInfo.environment["CODEXBAR_USE_LOCAL_SWEETCOOKIEKIT"] == "1"
 let sweetCookieKitDependency: Package.Dependency =
@@ -43,7 +51,7 @@ let package = Package(
     }(),
     dependencies: [
         .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.9.3"),
-        .package(url: "https://github.com/steipete/Commander", from: "0.2.1"),
+        commanderDependency,
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.13.2"),
         .package(url: "https://github.com/sindresorhus/KeyboardShortcuts", from: "2.4.0"),

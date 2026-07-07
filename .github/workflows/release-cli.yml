@@ -43,6 +43,10 @@ jobs:
           /usr/bin/xcodebuild -version | tee /tmp/xcode-version.txt
           grep -Eq '^Xcode 26\.' /tmp/xcode-version.txt
 
+      - name: Prepare macOS 12 dependency overrides
+        shell: bash
+        run: ./Scripts/prepare_macos12_dependency_overrides.sh
+
       - name: Validate release version
         shell: bash
         run: |
@@ -223,6 +227,11 @@ jobs:
           uname -a
           uname -m
           swift --version
+
+      - name: Prepare macOS 12 dependency overrides
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: ./Scripts/prepare_macos12_dependency_overrides.sh
 
       - name: Validate release tag
         if: github.event_name == 'release' || inputs.tag != ''

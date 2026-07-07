@@ -123,6 +123,10 @@ jobs:
           swift --version
           swift package --version
 
+      - name: Prepare macOS 12 dependency overrides
+        shell: bash
+        run: ./Scripts/prepare_macos12_dependency_overrides.sh
+
       - name: Check app locales and Swift formatting
         if: ${{ matrix.shard-index == 0 }}
         run: ./Scripts/lint.sh lint-macos
@@ -193,6 +197,10 @@ jobs:
           echo "DEVELOPER_DIR=${selected}/Contents/Developer" >> "$GITHUB_ENV"
           /usr/bin/xcodebuild -version | tee /tmp/xcode-version.txt
           grep -Eq '^Xcode 26\.' /tmp/xcode-version.txt
+
+      - name: Prepare macOS 12 dependency overrides
+        shell: bash
+        run: ./Scripts/prepare_macos12_dependency_overrides.sh
 
       - name: Package ad-hoc app
         shell: bash
