@@ -286,7 +286,7 @@ struct UsageBreakdownChartMenuView: View {
 
     private func selectionBandRect(model: Model, proxy: ChartProxy, geo: GeometryProxy) -> CGRect? {
         guard let key = self.selectedDayKey else { return nil }
-        guard let plotAnchor = proxy.plotFrame else { return nil }
+        let plotAnchor = proxy.plotAreaFrame
         let plotFrame = geo[plotAnchor]
         guard let index = model.dayDates.firstIndex(where: { $0.dayKey == key }) else { return nil }
         let date = model.dayDates[index].date
@@ -322,7 +322,7 @@ struct UsageBreakdownChartMenuView: View {
             return
         }
 
-        guard let plotAnchor = proxy.plotFrame else { return }
+        let plotAnchor = proxy.plotAreaFrame
         let plotFrame = geo[plotAnchor]
         guard plotFrame.contains(location) else { return }
 

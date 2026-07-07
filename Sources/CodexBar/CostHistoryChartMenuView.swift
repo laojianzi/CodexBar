@@ -410,7 +410,7 @@ struct CostHistoryChartMenuView: View {
 
     private func selectionBandRect(model: Model, proxy: ChartProxy, geo: GeometryProxy) -> CGRect? {
         guard let key = self.selectedDateKey else { return nil }
-        guard let plotAnchor = proxy.plotFrame else { return nil }
+        let plotAnchor = proxy.plotAreaFrame
         let plotFrame = geo[plotAnchor]
         guard let index = model.dateKeys.firstIndex(where: { $0.key == key }) else { return nil }
         let date = model.dateKeys[index].date
@@ -436,7 +436,7 @@ struct CostHistoryChartMenuView: View {
         // model-breakdown scroller remains interactive. The selection resets with the menu view.
         guard let location else { return }
 
-        guard let plotAnchor = proxy.plotFrame else { return }
+        let plotAnchor = proxy.plotAreaFrame
         let plotFrame = geo[plotAnchor]
         guard plotFrame.contains(location) else { return }
 
