@@ -124,7 +124,6 @@ private struct BurnDownLayout: View {
                     Text(burnWindowLabel(self.window.windowMinutes))
                         .font(.system(size: 11))
                         .foregroundStyle(theme.sub)
-                        .tracking(0.2)
                 }
 
                 Spacer()
