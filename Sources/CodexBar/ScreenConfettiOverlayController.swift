@@ -133,7 +133,6 @@ private struct ScreenConfettiOverlayView: View {
     let origin: CGPoint
     let colors: [Color]
 
-    @Environment(\.self) private var environment
     @State private var visiblePhaseCount = 0
 
     var body: some View {
@@ -227,12 +226,12 @@ private struct ScreenConfettiOverlayView: View {
         let normalizedX = size.width > 0 ? canvasOrigin.x / size.width : 1
         let normalizedY = size.height > 0 ? canvasOrigin.y / size.height : 0
         let resolvedColors = self.colors.map { color -> VortexSystem.Color in
-            let components = color.resolve(in: self.environment)
+            let components = NSColor(color).usingColorSpace(.deviceRGB) ?? .white
             return VortexSystem.Color(
-                red: Double(components.red),
-                green: Double(components.green),
-                blue: Double(components.blue),
-                opacity: Double(components.opacity))
+                red: Double(components.redComponent),
+                green: Double(components.greenComponent),
+                blue: Double(components.blueComponent),
+                opacity: Double(components.alphaComponent))
         }
 
         let explosion = VortexSystem(

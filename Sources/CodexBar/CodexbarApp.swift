@@ -119,22 +119,13 @@ struct CodexBarApp: App {
 }
 
 extension Scene {
-    @SceneBuilder
-    fileprivate func codexDefaultSize(width: CGFloat, height: CGFloat) -> some Scene {
-        if #available(macOS 13.0, *) {
-            self.defaultSize(width: width, height: height)
-        } else {
-            self
-        }
+    // ponytail: SceneBuilder on macOS 12 cannot branch here; AppKit still controls real windows.
+    fileprivate func codexDefaultSize(width _: CGFloat, height _: CGFloat) -> some Scene {
+        self
     }
 
-    @SceneBuilder
     fileprivate func codexWindowResizabilityContentSize() -> some Scene {
-        if #available(macOS 13.0, *) {
-            self.windowResizability(.contentSize)
-        } else {
-            self
-        }
+        self
     }
 }
 
