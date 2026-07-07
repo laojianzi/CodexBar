@@ -385,7 +385,7 @@ public enum MistralUsageFetcher {
         {
             return display
         }
-        raw.components(separatedBy: "::").first ?? raw
+        return raw.components(separatedBy: "::").first ?? raw
     }
 
     private static func dayKey(from timestamp: String?) -> String? {
