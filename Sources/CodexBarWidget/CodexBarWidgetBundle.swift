@@ -6,21 +6,21 @@ struct CodexBarWidgetBundle: WidgetBundle {
     @WidgetBundleBuilder
     var body: some Widget {
         CodexBarSwitcherWidget()
+        // ponytail: WidgetBundleBuilder on macOS 12 accepts single-arm availability, not if/else.
+        LegacyCodexBarUsageWidget()
+        LegacyCodexBarHistoryWidget()
+        LegacyCodexBarCreditsWidget()
+        LegacyCodexBarTodayCostWidget()
+        LegacyCodexBarLast30DaysCostWidget()
+        LegacyCodexBarSessionBurnDownWidget()
+        LegacyCodexBarWeeklyBurnDownWidget()
+        LegacyCodexBarCombinedBurnDownWidget()
         if #available(macOS 14.0, *) {
             CodexBarUsageWidget()
             CodexBarHistoryWidget()
             CodexBarCompactWidget()
             CodexBarBurnDownWidget()
             CodexBarCombinedBurnDownWidget()
-        } else {
-            LegacyCodexBarUsageWidget()
-            LegacyCodexBarHistoryWidget()
-            LegacyCodexBarCreditsWidget()
-            LegacyCodexBarTodayCostWidget()
-            LegacyCodexBarLast30DaysCostWidget()
-            LegacyCodexBarSessionBurnDownWidget()
-            LegacyCodexBarWeeklyBurnDownWidget()
-            LegacyCodexBarCombinedBurnDownWidget()
         }
     }
 }

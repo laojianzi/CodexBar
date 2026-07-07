@@ -205,7 +205,7 @@ struct LegacyBurnDownTimelineProvider: TimelineProvider {
     static func selectedBurnProvider(snapshot: WidgetSnapshot) -> UsageProvider {
         let providers = CodexBarSwitcherTimelineProvider.supportedProviders(from: snapshot)
         let stored = WidgetSelectionStore.loadSelectedProvider()
-        if [.codex, .claude].contains(stored), providers.contains(stored) {
+        if let stored, [.codex, .claude].contains(stored), providers.contains(stored) {
             return stored
         }
         if providers.contains(.codex) { return .codex }
