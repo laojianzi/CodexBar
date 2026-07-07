@@ -374,7 +374,7 @@ private struct ProviderDetailInfoRow: View {
     let labelWidth: CGFloat
 
     var body: some View {
-        GridRow {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(self.label)
                 .frame(width: self.labelWidth, alignment: .leading)
             Text(self.value)

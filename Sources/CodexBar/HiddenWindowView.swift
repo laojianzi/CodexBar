@@ -20,7 +20,7 @@ struct HiddenWindowView: View {
                 if let window = NSApp.windows.first(where: { $0.title == "CodexBarLifecycleKeepalive" }) {
                     // Make the keepalive window truly invisible and non-interactive.
                     window.styleMask = [.borderless]
-                    window.collectionBehavior = [.auxiliary, .ignoresCycle, .transient, .canJoinAllSpaces]
+                    window.collectionBehavior = [.ignoresCycle, .transient, .canJoinAllSpaces]
                     window.isExcludedFromWindowsMenu = true
                     window.level = .floating
                     window.isOpaque = false
