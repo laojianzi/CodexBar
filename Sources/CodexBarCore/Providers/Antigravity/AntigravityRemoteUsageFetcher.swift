@@ -368,7 +368,7 @@ public struct AntigravityRemoteUsageFetcher: Sendable {
         }
 
         for _ in 0..<5 {
-            try? await Task.sleep(for: .milliseconds(2000))
+            try? await CodexBarCompat.sleep(seconds: 2)
             let refreshed = try await Self.loadCodeAssist(
                 accessToken: accessToken,
                 timeout: context.timeout,

@@ -367,7 +367,7 @@ struct DeepSeekUsageFetcherTests {
             try await DeepSeekUsageFetcher._fetchUsageForTesting(
                 apiKey: "test-key",
                 includeOptionalUsage: true,
-                optionalSummaryJoinGrace: .milliseconds(50),
+                optionalSummaryJoinGrace: 0.05,
                 fetchBalanceData: { _ in
                     Data(Self.sampleBalanceJSON.utf8)
                 },
@@ -394,7 +394,7 @@ struct DeepSeekUsageFetcherTests {
         let snapshot = try await DeepSeekUsageFetcher._fetchUsageForTesting(
             apiKey: "test-key",
             includeOptionalUsage: true,
-            optionalSummaryJoinGrace: .milliseconds(20),
+            optionalSummaryJoinGrace: 0.02,
             fetchBalanceData: { _ in
                 Data(Self.sampleBalanceJSON.utf8)
             },
@@ -420,7 +420,7 @@ struct DeepSeekUsageFetcherTests {
         let snapshot = try await DeepSeekUsageFetcher._fetchUsageForTesting(
             apiKey: "test-key",
             includeOptionalUsage: true,
-            optionalSummaryJoinGrace: .seconds(2),
+            optionalSummaryJoinGrace: 2,
             fetchBalanceData: { _ in
                 Data(Self.sampleBalanceJSON.utf8)
             },
@@ -440,7 +440,7 @@ struct DeepSeekUsageFetcherTests {
             _ = try await DeepSeekUsageFetcher._fetchUsageForTesting(
                 apiKey: "test-key",
                 includeOptionalUsage: true,
-                optionalSummaryJoinGrace: .seconds(2),
+                optionalSummaryJoinGrace: 2,
                 fetchBalanceData: { _ in
                     await probe.waitUntilStarted()
                     throw DeepSeekUsageError.networkError("simulated balance failure")
@@ -469,7 +469,7 @@ struct DeepSeekUsageFetcherTests {
             _ = try await DeepSeekUsageFetcher._fetchUsageForTesting(
                 apiKey: "test-key",
                 includeOptionalUsage: true,
-                optionalSummaryJoinGrace: .seconds(2),
+                optionalSummaryJoinGrace: 2,
                 fetchBalanceData: { _ in
                     await probe.waitUntilStarted()
                     return Data("{\"is_available\":true,\"balance_infos\":[".utf8)
@@ -497,7 +497,7 @@ struct DeepSeekUsageFetcherTests {
             try await DeepSeekUsageFetcher._fetchUsageForTesting(
                 apiKey: "test-key",
                 includeOptionalUsage: true,
-                optionalSummaryJoinGrace: .seconds(30),
+                optionalSummaryJoinGrace: 30,
                 fetchBalanceData: { _ in
                     Data(Self.sampleBalanceJSON.utf8)
                 },
@@ -534,7 +534,7 @@ struct DeepSeekUsageFetcherTests {
             try await DeepSeekUsageFetcher._fetchUsageForTesting(
                 apiKey: "test-key",
                 includeOptionalUsage: true,
-                optionalSummaryJoinGrace: .seconds(30),
+                optionalSummaryJoinGrace: 30,
                 fetchBalanceData: { _ in
                     balanceStarted.continuation.yield(())
                     return await withCheckedContinuation { continuation in
@@ -580,7 +580,7 @@ struct DeepSeekUsageFetcherTests {
     @Test
     func `usage period supports injected test calendar`() throws {
         var calendar = Calendar(identifier: .buddhist)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
+        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? TimeZone(identifier: "GMT") ?? .current
         let date = try #require(Self.utcDate(year: 2026, month: 5, day: 26))
         let period = try DeepSeekUsageFetcher._apiUsagePeriodForTesting(now: date, calendar: calendar)
 
@@ -594,7 +594,7 @@ struct DeepSeekUsageFetcherTests {
         let snapshot = try await DeepSeekUsageFetcher._fetchUsageForTesting(
             apiKey: "test-key",
             includeOptionalUsage: true,
-            optionalSummaryJoinGrace: .seconds(2),
+            optionalSummaryJoinGrace: 2,
             fetchBalanceData: { _ in
                 Data(Self.sampleBalanceJSON.utf8)
             },
@@ -608,7 +608,7 @@ struct DeepSeekUsageFetcherTests {
 
     private static func utcDate(year: Int, month: Int, day: Int) -> Date? {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
+        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? TimeZone(identifier: "GMT") ?? .current
         return calendar.date(from: DateComponents(year: year, month: month, day: day))
     }
 }

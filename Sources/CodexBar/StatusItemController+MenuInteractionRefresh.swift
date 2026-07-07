@@ -3,14 +3,14 @@ import CodexBarCore
 import QuartzCore
 
 extension StatusItemController {
-    private static let defaultDeferredMenuInteractionRefreshDelay: Duration = .milliseconds(250)
+    private static let defaultDeferredMenuInteractionRefreshDelay: TimeInterval = 0.25
     private static let slowMenuOperationThreshold: TimeInterval = 0.15
     private static let slowChartRenderThreshold: TimeInterval = 0.050
 
     #if DEBUG
-    private static var deferredMenuInteractionRefreshDelayForTesting: Duration = .milliseconds(250)
+    private static var deferredMenuInteractionRefreshDelayForTesting: TimeInterval = 0.25
 
-    static func setDeferredMenuInteractionRefreshDelayForTesting(_ delay: Duration) {
+    static func setDeferredMenuInteractionRefreshDelayForTesting(_ delay: TimeInterval) {
         self.deferredMenuInteractionRefreshDelayForTesting = delay
     }
 
@@ -19,7 +19,7 @@ extension StatusItemController {
     }
     #endif
 
-    private static var deferredMenuInteractionRefreshDelay: Duration {
+    private static var deferredMenuInteractionRefreshDelay: TimeInterval {
         #if DEBUG
         deferredMenuInteractionRefreshDelayForTesting
         #else
@@ -108,7 +108,7 @@ extension StatusItemController {
         self.deferredMenuInteractionRefreshTask = nil
     }
 
-    func scheduleDeferredMenuInteractionRefreshIfNeeded(delay: Duration? = nil) {
+    func scheduleDeferredMenuInteractionRefreshIfNeeded(delay: TimeInterval? = nil) {
         guard self.openMenus.isEmpty else { return }
         guard self.deferredMenuInteractionRefreshPending || self.deferredOpenAIDashboardRefreshReason != nil else {
             return
@@ -118,7 +118,7 @@ extension StatusItemController {
         self.cancelDeferredMenuInteractionRefreshTask()
         let delay = delay ?? Self.deferredMenuInteractionRefreshDelay
         self.deferredMenuInteractionRefreshTask = Task { @MainActor [weak self] in
-            try? await Task.sleep(for: delay)
+            try? await CodexBarCompat.sleep(seconds: delay)
             guard let self, !Task.isCancelled else { return }
             guard self.openMenus.isEmpty else {
                 self.deferredMenuInteractionRefreshTask = nil

@@ -2,7 +2,6 @@ import Foundation
 #if os(macOS)
 @preconcurrency import AppKit
 import Darwin
-import os.lock
 import SweetCookieKit
 
 enum BrowserProfileAccessIssue: Equatable {
@@ -17,7 +16,7 @@ enum BrowserProfileAccessIssue: Equatable {
 public final class BrowserDetection: Sendable {
     public static let defaultCacheTTL: TimeInterval = 60 * 10
 
-    private let cache = OSAllocatedUnfairLock<[CacheKey: CachedResult]>(initialState: [:])
+    private let cache = CodexBarLockedState<[CacheKey: CachedResult]>(initialState: [:])
     private let homeDirectory: String
     private let cacheTTL: TimeInterval
     private let now: @Sendable () -> Date

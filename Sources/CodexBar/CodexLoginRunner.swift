@@ -171,7 +171,7 @@ struct CodexLoginRunner {
         stderr: ProcessPipeCapture,
         timeout: TimeInterval) async -> String
     {
-        let drainTimeout = Duration.seconds(max(0, timeout))
+        let drainTimeout = max(0, timeout)
         async let outData = stdout.finish(timeout: drainTimeout)
         async let errData = stderr.finish(timeout: drainTimeout)
         let out = await self.decode(outData)

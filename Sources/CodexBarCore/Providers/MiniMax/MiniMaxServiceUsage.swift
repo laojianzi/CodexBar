@@ -189,10 +189,10 @@ extension MiniMaxServiceUsage {
 
         // Handle "2026/03/25 00:00 - 2026/03/26 00:00" format
         if timeRange.contains(" - ") {
-            let dateComponents = timeRange.split(separator: " - ")
+            let dateComponents = timeRange.components(separatedBy: " - ")
             guard dateComponents.count == 2 else { return nil }
 
-            let endDateStr = String(dateComponents[1]).trimmingCharacters(in: .whitespaces)
+            let endDateStr = dateComponents[1].trimmingCharacters(in: .whitespaces)
 
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy/MM/dd HH:mm"

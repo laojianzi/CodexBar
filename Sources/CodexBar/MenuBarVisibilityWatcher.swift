@@ -1,4 +1,5 @@
 import AppKit
+import CodexBarCore
 import Foundation
 
 struct StatusItemVisibilitySnapshot: Equatable {
@@ -45,8 +46,8 @@ enum MenuBarVisibilityWatcher {
     static let guidanceRepeatInterval: TimeInterval = 24 * 60 * 60
     static let startupFreshnessInterval: TimeInterval = 10
     static let startupCheckDelay: TimeInterval = 2
-    static let screenChangeCheckDelay: Duration = .milliseconds(750)
-    static let screenChangeFollowUpDelay: Duration = .seconds(2)
+    static let screenChangeCheckDelay: TimeInterval = 0.75
+    static let screenChangeFollowUpDelay: TimeInterval = 2
     static let settingsURL = URL(string: "x-apple.systempreferences:com.apple.MenuBarSettings")!
 
     @MainActor
@@ -284,7 +285,7 @@ extension StatusItemController {
         self.screenChangeVisibilityTask?.cancel()
         self.screenChangeVisibilityTask = Task { @MainActor [weak self] in
             do {
-                try await Task.sleep(for: MenuBarVisibilityWatcher.screenChangeCheckDelay)
+                try await CodexBarCompat.sleep(seconds: MenuBarVisibilityWatcher.screenChangeCheckDelay)
             } catch {
                 return
             }
@@ -336,7 +337,7 @@ extension StatusItemController {
     private func schedulePostScreenChangeRecoveryVerification(attempt: Int) {
         self.screenChangeVisibilityTask = Task { @MainActor [weak self] in
             do {
-                try await Task.sleep(for: MenuBarVisibilityWatcher.screenChangeFollowUpDelay)
+                try await CodexBarCompat.sleep(seconds: MenuBarVisibilityWatcher.screenChangeFollowUpDelay)
             } catch {
                 return
             }

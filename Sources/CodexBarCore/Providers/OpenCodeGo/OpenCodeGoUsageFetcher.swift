@@ -148,7 +148,7 @@ public struct OpenCodeGoUsageFetcher: Sendable {
                 session: session)
         }
         let zenBalanceTask = includeZenBalance ? Task {
-            try await Task.sleep(for: self.optionalZenBalanceStartDelay)
+            try await CodexBarCompat.sleep(seconds: self.optionalZenBalanceStartDelay)
             return try await self.fetchZenBalance(
                 workspaceID: workspaceID,
                 cookieHeader: requestCookieHeader,

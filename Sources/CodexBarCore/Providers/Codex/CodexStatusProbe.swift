@@ -184,16 +184,24 @@ public struct CodexStatusProbe {
         formatter.timeZone = TimeZone.current
         formatter.defaultDate = now
 
-        if let match = raw.firstMatch(of: /^([0-9]{1,2}:[0-9]{2}) on ([0-9]{1,2} [A-Za-z]{3})$/) {
-            raw = "\(match.output.2) \(match.output.1)"
+        if let match = CodexBarCompat.regexCaptureGroups(
+            in: raw,
+            pattern: #"^([0-9]{1,2}:[0-9]{2}) on ([0-9]{1,2} [A-Za-z]{3})$"#).first,
+            match.count == 2
+        {
+            raw = "\(match[1]) \(match[0])"
             formatter.dateFormat = "d MMM HH:mm"
             if let date = formatter.date(from: raw) {
                 return self.bumpYearIfNeeded(date, now: now, calendar: calendar)
             }
         }
 
-        if let match = raw.firstMatch(of: /^([0-9]{1,2}:[0-9]{2}) on ([A-Za-z]{3} [0-9]{1,2})$/) {
-            raw = "\(match.output.2) \(match.output.1)"
+        if let match = CodexBarCompat.regexCaptureGroups(
+            in: raw,
+            pattern: #"^([0-9]{1,2}:[0-9]{2}) on ([A-Za-z]{3} [0-9]{1,2})$"#).first,
+            match.count == 2
+        {
+            raw = "\(match[1]) \(match[0])"
             formatter.dateFormat = "MMM d HH:mm"
             if let date = formatter.date(from: raw) {
                 return self.bumpYearIfNeeded(date, now: now, calendar: calendar)

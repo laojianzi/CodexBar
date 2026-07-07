@@ -449,7 +449,7 @@ struct StatusMenuTests {
     func `delayed menu refresh skips when refresh disabled during delay`() async {
         StatusItemController.menuCardRenderingEnabled = false
         StatusItemController.setMenuRefreshEnabledForTesting(true)
-        StatusItemController.setMenuOpenRefreshDelayForTesting(.milliseconds(50))
+        StatusItemController.setMenuOpenRefreshDelayForTesting(0.05)
         defer {
             StatusItemController.resetMenuOpenRefreshDelayForTesting()
             StatusItemController.resetMenuRefreshEnabledForTesting()

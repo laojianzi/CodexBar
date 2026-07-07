@@ -69,7 +69,7 @@ final class ScreenConfettiOverlayController {
         }
 
         self.dismissalTask = Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .seconds(Self.overlayLifetime))
+            try? await CodexBarCompat.sleep(seconds: Self.overlayLifetime)
             self?.dismiss()
         }
     }
@@ -209,7 +209,7 @@ private struct ScreenConfettiOverlayView: View {
             .task {
                 self.visiblePhaseCount = 1
                 for phaseCount in 2...Self.clockwiseRotationAngles.count {
-                    try? await Task.sleep(for: .milliseconds(60))
+                    try? await CodexBarCompat.sleep(seconds: 0.06)
                     self.visiblePhaseCount = phaseCount
                 }
             }

@@ -244,8 +244,8 @@ public enum SubprocessRunner {
                 throw SubprocessRunnerError.timedOut(label)
             }
 
-            async let stdoutData = stdoutCapture.finish(timeout: .seconds(1))
-            async let stderrData = stderrCapture.finish(timeout: .seconds(1))
+            async let stdoutData = stdoutCapture.finish(timeout: 1)
+            async let stderrData = stderrCapture.finish(timeout: 1)
             let stdout = await ProcessPipeCapture.decodeUTF8(stdoutData)
             let stderr = await ProcessPipeCapture.decodeUTF8(stderrData)
 

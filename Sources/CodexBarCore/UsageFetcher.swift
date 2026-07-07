@@ -1104,7 +1104,7 @@ private final class CodexRPCClient: @unchecked Sendable {
                 try await body()
             }
             group.addTask { [weak self] in
-                try await Task.sleep(for: .seconds(seconds))
+                try await CodexBarCompat.sleep(seconds: seconds)
                 self?.terminateProcessForTimeout(method: method)
                 throw RPCWireError.timeout(method: method)
             }

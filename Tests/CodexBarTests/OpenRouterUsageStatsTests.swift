@@ -206,7 +206,7 @@ struct OpenRouterUsageStatsTests {
         let startedAt = ContinuousClock.now
 
         let fetched = try await OpenRouterUsageFetcher._boundedKeyFetchForTesting(
-            timeout: .milliseconds(20))
+            timeout: 0.02)
         {
             await withCheckedContinuation { continuation in
                 DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {

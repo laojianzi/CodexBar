@@ -687,7 +687,7 @@ final class UsageStore: ObservableObject {
         self.snapshots.removeAll()
         self.debugForceAnimation = true
         Task { @MainActor in
-            try? await Task.sleep(for: .seconds(duration))
+            try? await CodexBarCompat.sleep(seconds: duration)
             if let current, let provider = self.enabledProviders().first {
                 self.snapshots[provider] = current
             }
@@ -708,7 +708,7 @@ final class UsageStore: ObservableObject {
         // Background poller so the menu stays responsive; canceled when settings change or store deallocates.
         self.timerTask = Task.detached(priority: .utility) { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(wait))
+                try? await CodexBarCompat.sleep(seconds: wait)
                 await self?.refresh()
             }
         }
@@ -719,7 +719,7 @@ final class UsageStore: ObservableObject {
         let wait = self.tokenFetchTTL
         self.tokenTimerTask = Task.detached(priority: .utility) { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(wait))
+                try? await CodexBarCompat.sleep(seconds: wait)
                 await self?.scheduleTokenRefresh(force: false)
             }
         }

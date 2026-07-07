@@ -129,11 +129,11 @@ public struct DeepSeekUsageFetcher: Sendable {
     private static let usageAmountURL = URL(string: "https://platform.deepseek.com/api/v0/usage/amount")!
     private static let usageCostURL = URL(string: "https://platform.deepseek.com/api/v0/usage/cost")!
     private static let timeoutSeconds: TimeInterval = 15
-    private static let optionalSummaryJoinGrace: Duration = .seconds(2)
+    private static let optionalSummaryJoinGrace: TimeInterval = 2
     private static var apiCalendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.locale = Locale(identifier: "en_US_POSIX")
-        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
+        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? TimeZone(identifier: "GMT") ?? .current
         return calendar
     }
 
@@ -156,7 +156,7 @@ public struct DeepSeekUsageFetcher: Sendable {
     static func _fetchUsageForTesting(
         apiKey: String,
         includeOptionalUsage: Bool,
-        optionalSummaryJoinGrace: Duration = .zero,
+        optionalSummaryJoinGrace: TimeInterval = 0,
         fetchBalanceData: @escaping @Sendable (String) async throws -> Data,
         fetchSummary: @escaping @Sendable (String) async throws -> DeepSeekUsageSummary)
         async throws -> DeepSeekUsageSnapshot
@@ -172,7 +172,7 @@ public struct DeepSeekUsageFetcher: Sendable {
     private static func fetchUsage(
         apiKey: String,
         includeOptionalUsage: Bool,
-        optionalSummaryJoinGrace: Duration,
+        optionalSummaryJoinGrace: TimeInterval,
         fetchBalanceData: @escaping @Sendable (String) async throws -> Data,
         fetchSummary: @escaping @Sendable (String) async throws -> DeepSeekUsageSummary)
         async throws -> DeepSeekUsageSnapshot
@@ -246,7 +246,7 @@ public struct DeepSeekUsageFetcher: Sendable {
 
     private static func completedOptionalUsageSummary(
         from task: Task<DeepSeekUsageSummary, Error>,
-        joinGrace: Duration) async throws -> DeepSeekUsageSummary?
+        joinGrace: TimeInterval) async throws -> DeepSeekUsageSummary?
     {
         let race = BoundedTaskJoin(sourceTask: task)
         switch await race.value(joinGrace: joinGrace) {

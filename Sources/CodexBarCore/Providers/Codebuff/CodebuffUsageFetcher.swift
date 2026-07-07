@@ -24,7 +24,7 @@ public enum CodebuffUsageFetcher {
             environment: environment,
             includeSubscription: includeSubscription,
             transport: transport,
-            subscriptionGrace: .seconds(self.subscriptionGraceSeconds))
+            subscriptionGrace: self.subscriptionGraceSeconds)
     }
 
     static func _fetchUsageForTesting(
@@ -32,7 +32,7 @@ public enum CodebuffUsageFetcher {
         environment: [String: String] = ProcessInfo.processInfo.environment,
         includeSubscription: Bool = true,
         transport: any ProviderHTTPTransport,
-        subscriptionGrace: Duration) async throws -> CodebuffUsageSnapshot
+        subscriptionGrace: TimeInterval) async throws -> CodebuffUsageSnapshot
     {
         try await self.fetchUsage(
             apiKey: apiKey,
@@ -47,7 +47,7 @@ public enum CodebuffUsageFetcher {
         environment: [String: String],
         includeSubscription: Bool,
         transport: any ProviderHTTPTransport,
-        subscriptionGrace: Duration) async throws -> CodebuffUsageSnapshot
+        subscriptionGrace: TimeInterval) async throws -> CodebuffUsageSnapshot
     {
         let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
@@ -85,7 +85,7 @@ public enum CodebuffUsageFetcher {
         baseURL: URL,
         includeSubscription: Bool,
         transport: any ProviderHTTPTransport,
-        subscriptionGrace: Duration) async throws -> (UsagePayload, SubscriptionPayload?)
+        subscriptionGrace: TimeInterval) async throws -> (UsagePayload, SubscriptionPayload?)
     {
         guard includeSubscription else {
             return try await (

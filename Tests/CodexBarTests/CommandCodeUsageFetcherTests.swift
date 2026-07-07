@@ -172,7 +172,7 @@ struct CommandCodeUsageFetcherTests {
         let snapshot = try await CommandCodeUsageFetcher._fetchUsageForTesting(
             cookieHeader: "session=valid",
             transport: transport,
-            subscriptionGrace: .milliseconds(20))
+            subscriptionGrace: 0.02)
         let elapsed = startedAt.duration(to: .now)
 
         #expect(snapshot.monthlyCreditsRemaining == 8.7784)

@@ -80,7 +80,7 @@ extension StatusMenuTests {
             preferencesSelection: PreferencesSelection(),
             statusBar: self.makeStatusBarForTesting())
         defer { controller.releaseStatusItemsForTesting() }
-        StatusItemController.setClosedMenuPreparationDelayForTesting(.zero)
+        StatusItemController.setClosedMenuPreparationDelayForTesting(0)
         defer { StatusItemController.resetClosedMenuPreparationDelayForTesting() }
 
         controller.menuRefreshEnabledOverrideForTesting = true
@@ -147,7 +147,7 @@ extension StatusMenuTests {
             preferencesSelection: PreferencesSelection(),
             statusBar: self.makeStatusBarForTesting())
         defer { controller.releaseStatusItemsForTesting() }
-        StatusItemController.setClosedMenuPreparationDelayForTesting(.zero)
+        StatusItemController.setClosedMenuPreparationDelayForTesting(0)
         defer { StatusItemController.resetClosedMenuPreparationDelayForTesting() }
 
         controller.menuRefreshEnabledOverrideForTesting = true
@@ -204,7 +204,7 @@ extension StatusMenuTests {
             preferencesSelection: PreferencesSelection(),
             statusBar: self.makeStatusBarForTesting())
         defer { controller.releaseStatusItemsForTesting() }
-        StatusItemController.setClosedMenuPreparationDelayForTesting(.zero)
+        StatusItemController.setClosedMenuPreparationDelayForTesting(0)
         defer { StatusItemController.resetClosedMenuPreparationDelayForTesting() }
 
         controller.menuRefreshEnabledOverrideForTesting = true
@@ -249,7 +249,7 @@ extension StatusMenuTests {
             preferencesSelection: PreferencesSelection(),
             statusBar: self.makeStatusBarForTesting())
         defer { controller.releaseStatusItemsForTesting() }
-        StatusItemController.setClosedMenuPreparationDelayForTesting(.zero)
+        StatusItemController.setClosedMenuPreparationDelayForTesting(0)
         defer { StatusItemController.resetClosedMenuPreparationDelayForTesting() }
 
         controller.menuRefreshEnabledOverrideForTesting = true
@@ -284,7 +284,7 @@ extension StatusMenuTests {
 
     @Test
     func `closed attached menu preparation waits for token refresh to finish`() async {
-        StatusItemController.setClosedMenuPreparationDelayForTesting(.zero)
+        StatusItemController.setClosedMenuPreparationDelayForTesting(0)
         defer { StatusItemController.resetClosedMenuPreparationDelayForTesting() }
 
         self.disableMenuCardsForTesting()
@@ -352,7 +352,7 @@ extension StatusMenuTests {
             preferencesSelection: PreferencesSelection(),
             statusBar: self.makeStatusBarForTesting())
         defer { controller.releaseStatusItemsForTesting() }
-        StatusItemController.setClosedMenuPreparationDelayForTesting(.zero)
+        StatusItemController.setClosedMenuPreparationDelayForTesting(0)
         defer { StatusItemController.resetClosedMenuPreparationDelayForTesting() }
 
         let key: ObjectIdentifier
@@ -390,7 +390,7 @@ extension StatusMenuTests {
             preferencesSelection: PreferencesSelection(),
             statusBar: self.makeStatusBarForTesting())
         defer { controller.releaseStatusItemsForTesting() }
-        StatusItemController.setClosedMenuPreparationDelayForTesting(.zero)
+        StatusItemController.setClosedMenuPreparationDelayForTesting(0)
         defer { StatusItemController.resetClosedMenuPreparationDelayForTesting() }
 
         controller.menuRefreshEnabledOverrideForTesting = true
@@ -906,7 +906,7 @@ extension StatusMenuTests {
         defer { controller.releaseStatusItemsForTesting() }
 
         controller.menuRefreshEnabledOverrideForTesting = true
-        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(.zero)
+        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(0)
         defer { StatusItemController.resetDeferredMenuInteractionRefreshDelayForTesting() }
 
         let menu = controller.makeMenu()
@@ -963,7 +963,7 @@ extension StatusMenuTests {
         defer { controller.releaseStatusItemsForTesting() }
 
         controller.menuRefreshEnabledOverrideForTesting = true
-        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(.zero)
+        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(0)
         defer { StatusItemController.resetDeferredMenuInteractionRefreshDelayForTesting() }
 
         let menu = controller.makeMenu()
@@ -1010,7 +1010,7 @@ extension StatusMenuTests {
             statusBar: self.makeStatusBarForTesting())
         defer { controller.releaseStatusItemsForTesting() }
 
-        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(.zero)
+        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(0)
         defer { StatusItemController.resetDeferredMenuInteractionRefreshDelayForTesting() }
 
         controller.deferOpenAIDashboardRefreshUntilMenuCloses(reason: "parent menu open")
@@ -1067,7 +1067,7 @@ extension StatusMenuTests {
         defer { controller.releaseStatusItemsForTesting() }
 
         controller.menuRefreshEnabledOverrideForTesting = true
-        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(.zero)
+        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(0)
         defer { StatusItemController.resetDeferredMenuInteractionRefreshDelayForTesting() }
 
         let menu = controller.makeMenu()
@@ -1124,7 +1124,7 @@ extension StatusMenuTests {
         defer { controller.releaseStatusItemsForTesting() }
 
         controller.menuRefreshEnabledOverrideForTesting = true
-        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(.zero)
+        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(0)
         defer { StatusItemController.resetDeferredMenuInteractionRefreshDelayForTesting() }
 
         let menu = controller.makeMenu()
@@ -1181,7 +1181,7 @@ extension StatusMenuTests {
         defer { controller.releaseStatusItemsForTesting() }
 
         controller.menuRefreshEnabledOverrideForTesting = true
-        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(.zero)
+        StatusItemController.setDeferredMenuInteractionRefreshDelayForTesting(0)
         defer { StatusItemController.resetDeferredMenuInteractionRefreshDelayForTesting() }
 
         let menu = controller.makeMenu()

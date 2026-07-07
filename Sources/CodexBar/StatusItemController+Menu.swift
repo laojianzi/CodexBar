@@ -10,10 +10,10 @@ extension StatusItemController {
     private static let maxOverviewProviders = SettingsStore.mergedOverviewProviderLimit
     static let overviewRowIdentifierPrefix = "overviewRow-"
     static let persistentRefreshMenuItemID = "persistentRefreshAction"
-    private static let defaultMenuOpenRefreshDelay: Duration = .seconds(1.2)
+    private static let defaultMenuOpenRefreshDelay: TimeInterval = 1.2
     #if DEBUG
-    private static var menuOpenRefreshDelayForTesting: Duration = .seconds(1.2)
-    static func setMenuOpenRefreshDelayForTesting(_ delay: Duration) {
+    private static var menuOpenRefreshDelayForTesting: TimeInterval = 1.2
+    static func setMenuOpenRefreshDelayForTesting(_ delay: TimeInterval) {
         self.menuOpenRefreshDelayForTesting = delay
     }
 
@@ -22,7 +22,7 @@ extension StatusItemController {
     }
     #endif
 
-    private static var menuOpenRefreshDelay: Duration {
+    private static var menuOpenRefreshDelay: TimeInterval {
         #if DEBUG
         menuOpenRefreshDelayForTesting
         #else
@@ -1124,7 +1124,7 @@ extension StatusItemController {
         self.menuRefreshTasks[key]?.cancel()
         self.menuRefreshTasks[key] = Task { @MainActor [weak self, weak menu] in
             guard let self, let menu else { return }
-            try? await Task.sleep(for: Self.menuOpenRefreshDelay)
+            try? await CodexBarCompat.sleep(seconds: Self.menuOpenRefreshDelay)
             guard !Task.isCancelled else { return }
             guard self.isMenuRefreshEnabled else { return }
             #if DEBUG

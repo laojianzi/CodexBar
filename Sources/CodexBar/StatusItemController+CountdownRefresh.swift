@@ -26,7 +26,7 @@ extension StatusItemController {
 
         self.menuBarCountdownRefreshTask = Task { @MainActor [weak self] in
             do {
-                try await Task.sleep(for: .seconds(delay))
+                try await CodexBarCompat.sleep(seconds: delay)
             } catch {
                 return
             }

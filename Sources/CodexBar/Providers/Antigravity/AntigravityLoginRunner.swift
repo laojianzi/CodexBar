@@ -54,7 +54,7 @@ enum AntigravityLoginRunner {
                     try await server.waitForCallback()
                 }
                 group.addTask {
-                    try await Task.sleep(for: .seconds(timeout))
+                    try await CodexBarCompat.sleep(seconds: timeout)
                     server.cancelCallbackWait(with: AntigravityLoginError.timedOut)
                     throw AntigravityLoginError.timedOut
                 }

@@ -71,7 +71,7 @@ public final class AugmentSessionKeepalive {
 
         self.timerTask = Task.detached(priority: .utility) { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(self?.checkInterval ?? 300))
+                try? await CodexBarCompat.sleep(seconds: self?.checkInterval ?? 300)
                 await self?.checkAndRefreshIfNeeded()
             }
         }
@@ -209,7 +209,7 @@ public final class AugmentSessionKeepalive {
 
             if refreshed {
                 // Step 2: Re-import cookies from browser
-                try await Task.sleep(for: .seconds(1)) // Brief delay for browser to update cookies
+                try await CodexBarCompat.sleep(seconds: 1) // Brief delay for browser to update cookies
                 let newSession = try AugmentCookieImporter.importSession(logger: self.logger)
 
                 await AugmentSessionStore.shared.setCookies(newSession.cookies)
@@ -280,7 +280,7 @@ public final class AugmentSessionKeepalive {
             self.log("   ⏳ Waiting 5 seconds for browser to re-authenticate...")
 
             // Wait for browser to potentially re-authenticate
-            try? await Task.sleep(for: .seconds(5))
+            try? await CodexBarCompat.sleep(seconds: 5)
 
             // Try to import cookies again
             do {

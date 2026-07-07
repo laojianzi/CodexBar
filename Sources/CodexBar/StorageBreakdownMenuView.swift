@@ -348,7 +348,7 @@ struct StoragePathCopyButton: View {
             MenuPasteboardCopy.perform(self.path, completion: {
                 self.didCopy = true
                 self.resetTask = Task { @MainActor in
-                    try? await Task.sleep(for: .seconds(0.9))
+                    try? await CodexBarCompat.sleep(seconds: 0.9)
                     self.didCopy = false
                 }
             })

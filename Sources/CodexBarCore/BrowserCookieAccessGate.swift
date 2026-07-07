@@ -1,7 +1,6 @@
 import Foundation
 
 #if os(macOS)
-import os.lock
 import SweetCookieKit
 
 enum BrowserCookieStoreAccessDecision: Equatable {
@@ -21,7 +20,7 @@ public enum BrowserCookieAccessGate {
         var deniedUntilByBrowser: [String: Date] = [:]
     }
 
-    private static let lock = OSAllocatedUnfairLock<State>(initialState: State())
+    private static let lock = CodexBarLockedState<State>(initialState: State())
     private static let defaultsKey = "browserCookieAccessDeniedUntil"
     private static let cooldownInterval: TimeInterval = 60 * 60 * 6
     private static let log = CodexBarLog.logger(LogCategories.browserCookieGate)
