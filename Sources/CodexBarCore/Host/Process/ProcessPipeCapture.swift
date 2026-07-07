@@ -30,7 +30,7 @@ package final class ProcessPipeCapture: @unchecked Sendable {
         }
     }
 
-    package func finish(timeout: Duration) async -> Data {
+    package func finish(timeout: TimeInterval) async -> Data {
         let drainTask = Task<Void, Error> {
             await self.waitUntilFinished()
         }

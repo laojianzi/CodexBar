@@ -91,7 +91,7 @@ final class QuotaWarningAlertOverlayController {
         self.logger.info("Presenting quota warning overlay")
 
         self.dismissalTask = Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .seconds(Self.overlayLifetime))
+            try? await CodexBarCompat.sleep(seconds: Self.overlayLifetime)
             guard !Task.isCancelled else { return }
             guard let self, self.presentationState.dismiss(generation: presentation.generation) else { return }
             self.closeWindow()

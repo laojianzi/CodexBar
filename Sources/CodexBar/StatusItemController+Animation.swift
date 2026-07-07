@@ -4,8 +4,8 @@ import QuartzCore
 
 extension StatusItemController {
     private static let loadingPercentEpsilon = 0.0001
-    private static let blinkActiveTickInterval: Duration = .milliseconds(75)
-    private static let blinkIdleFallbackInterval: Duration = .seconds(1)
+    private static let blinkActiveTickInterval: TimeInterval = 0.075
+    private static let blinkIdleFallbackInterval: TimeInterval = 1
     static let loadingAnimationFPS: Double = 30.0
     static let loadingAnimationPhaseIncrement: Double =
         2.7 / StatusItemController.loadingAnimationFPS
@@ -44,7 +44,7 @@ extension StatusItemController {
                             self?.blinkTickSleepDuration(now: Date())
                                 ?? Self.blinkIdleFallbackInterval
                         }
-                        try? await Task.sleep(for: delay)
+                        try? await CodexBarCompat.sleep(seconds: delay)
                         await MainActor.run { self?.tickBlink() }
                     }
                 }
@@ -76,7 +76,7 @@ extension StatusItemController {
         }
     }
 
-    private func blinkTickSleepDuration(now: Date) -> Duration {
+    private func blinkTickSleepDuration(now: Date) -> TimeInterval {
         let mergeIcons = self.shouldMergeIcons
         var nextWakeAt: Date?
 
@@ -106,7 +106,7 @@ extension StatusItemController {
         guard let nextWakeAt else { return Self.blinkIdleFallbackInterval }
         let delay = nextWakeAt.timeIntervalSince(now)
         if delay <= 0 { return Self.blinkActiveTickInterval }
-        return .seconds(delay)
+        return delay
     }
 
     private func tickBlink(now: Date = .init()) {
@@ -603,7 +603,7 @@ extension StatusItemController {
         self.updateIcons()
         self.applyQuotaWarningIconDuringMergedMenuTrackingIfNeeded()
         self.quotaWarningFlashTasks[provider] = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(Self.quotaWarningFlashDuration))
+            try? await CodexBarCompat.sleep(seconds: Self.quotaWarningFlashDuration)
             await MainActor.run { [weak self] in
                 self?.clearExpiredQuotaWarningFlash(provider: provider)
             }

@@ -497,7 +497,7 @@ struct CrossModelUsageStatsTests {
             apiKey: "cm-test",
             environment: ["CROSSMODEL_API_URL": "https://crossmodel.test/v1"],
             transport: transport,
-            usageJoinGrace: .milliseconds(50))
+            usageJoinGrace: 0.05)
         let elapsed = start.duration(to: .now)
 
         #expect(usage.balance == 1.5)
@@ -533,7 +533,7 @@ struct CrossModelUsageStatsTests {
                 apiKey: "cm-test",
                 environment: ["CROSSMODEL_API_URL": "https://crossmodel.test/v1"],
                 transport: transport,
-                usageJoinGrace: .seconds(30))
+                usageJoinGrace: 30)
         }
 
         try await Task.sleep(for: .milliseconds(50))

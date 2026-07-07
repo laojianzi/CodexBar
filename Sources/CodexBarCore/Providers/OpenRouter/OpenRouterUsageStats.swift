@@ -303,7 +303,7 @@ public struct OpenRouterUsageFetcher: Sendable {
         timeoutSeconds: TimeInterval) async throws -> OpenRouterKeyFetchResult
     {
         let timeout = max(0.1, timeoutSeconds)
-        return try await self.boundedKeyFetch(timeout: .seconds(timeout)) {
+        return try await self.boundedKeyFetch(timeout: timeout) {
             await Self.fetchKeyDataRequest(
                 apiKey: apiKey,
                 baseURL: baseURL,
@@ -312,7 +312,7 @@ public struct OpenRouterUsageFetcher: Sendable {
     }
 
     static func _boundedKeyFetchForTesting(
-        timeout: Duration,
+        timeout: TimeInterval,
         operation: @escaping @Sendable () async -> Void) async throws -> Bool
     {
         let result = try await self.boundedKeyFetch(timeout: timeout) {
@@ -323,7 +323,7 @@ public struct OpenRouterUsageFetcher: Sendable {
     }
 
     private static func boundedKeyFetch(
-        timeout: Duration,
+        timeout: TimeInterval,
         operation: @escaping @Sendable () async -> OpenRouterKeyFetchResult) async throws -> OpenRouterKeyFetchResult
     {
         let sourceTask = Task<OpenRouterKeyFetchResult, Error> {

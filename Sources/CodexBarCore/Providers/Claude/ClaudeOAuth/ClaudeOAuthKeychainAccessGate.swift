@@ -1,7 +1,6 @@
 import Foundation
 
 #if os(macOS)
-import os.lock
 
 public enum ClaudeOAuthKeychainAccessGate {
     private struct State {
@@ -9,7 +8,7 @@ public enum ClaudeOAuthKeychainAccessGate {
         var deniedUntil: Date?
     }
 
-    private static let lock = OSAllocatedUnfairLock<State>(initialState: State())
+    private static let lock = CodexBarLockedState<State>(initialState: State())
     private static let defaultsKey = "claudeOAuthKeychainDeniedUntil"
     private static let cooldownInterval: TimeInterval = 60 * 60 * 6
     @TaskLocal private static var taskOverrideShouldAllowPromptForTesting: Bool?

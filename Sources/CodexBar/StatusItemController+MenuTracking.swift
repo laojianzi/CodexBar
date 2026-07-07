@@ -2,7 +2,7 @@ import AppKit
 import CodexBarCore
 
 extension StatusItemController {
-    private static let defaultClosedMenuPreparationDelay: Duration = .milliseconds(350)
+    private static let defaultClosedMenuPreparationDelay: TimeInterval = 0.35
 
     var isMenuRefreshEnabled: Bool {
         #if DEBUG
@@ -14,8 +14,8 @@ extension StatusItemController {
     }
 
     #if DEBUG
-    private static var closedMenuPreparationDelayForTesting: Duration = defaultClosedMenuPreparationDelay
-    static func setClosedMenuPreparationDelayForTesting(_ delay: Duration) {
+    private static var closedMenuPreparationDelayForTesting: TimeInterval = defaultClosedMenuPreparationDelay
+    static func setClosedMenuPreparationDelayForTesting(_ delay: TimeInterval) {
         self.closedMenuPreparationDelayForTesting = delay
     }
 
@@ -24,7 +24,7 @@ extension StatusItemController {
     }
     #endif
 
-    private static var closedMenuPreparationDelay: Duration {
+    private static var closedMenuPreparationDelay: TimeInterval {
         #if DEBUG
         closedMenuPreparationDelayForTesting
         #else
@@ -247,7 +247,7 @@ extension StatusItemController {
         self.closedMenuRebuildTasks[key] = Task { @MainActor [weak self, weak menu] in
             let delay = Self.closedMenuPreparationDelay
             if delay > .zero {
-                try? await Task.sleep(for: delay)
+                try? await CodexBarCompat.sleep(seconds: delay)
             }
             guard !Task.isCancelled else { return }
             await Task.yield()

@@ -794,7 +794,7 @@ extension CodexBarCLI {
         providerTimeout: TimeInterval?,
         fetch: @Sendable @escaping (UsageProvider) async -> UsageCommandOutput) async -> UsageCommandOutput
     {
-        let grace = providerTimeout.map { Duration.seconds(max(0, $0)) }
+        let grace = providerTimeout.map { max(0, $0) }
         let indexed = await withTaskGroup(of: (Int, UsageCommandOutput).self) { group in
             for (index, provider) in providers.enumerated() {
                 group.addTask {

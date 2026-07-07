@@ -3,14 +3,14 @@ import CryptoKit
 import Foundation
 import WebKit
 
-/// Per-account persistent `WKWebsiteDataStore` for the OpenAI dashboard scrape.
+/// Per-account `WKWebsiteDataStore` for the OpenAI dashboard scrape.
 ///
 /// Why: `WKWebsiteDataStore.default()` is a single shared cookie jar. If the user switches Codex accounts,
 /// we want to keep multiple signed-in dashboard sessions around (one per email) without clearing cookies.
 ///
 /// Implementation detail: macOS 14+ supports `WKWebsiteDataStore.dataStore(forIdentifier:)`, which creates
-/// persistent isolated stores keyed by an identifier. We derive a stable UUID from the email and optional
-/// Codex source scope so distinct profiles with the same email never share a cookie store.
+/// persistent isolated stores keyed by an identifier. macOS 12/13 fall back to cached non-persistent stores,
+/// preserving account isolation for the current app session.
 ///
 /// Important: We cache the `WKWebsiteDataStore` instances so the same object is returned for the same
 /// account email. This ensures `OpenAIDashboardWebViewCache` can use object identity for cache lookups.
@@ -32,8 +32,13 @@ public enum OpenAIDashboardWebsiteDataStore {
             return cached
         }
 
-        let id = Self.identifier(forStorageKey: storageKey)
-        let store = WKWebsiteDataStore(forIdentifier: id)
+        let store: WKWebsiteDataStore
+        if #available(macOS 14.0, *) {
+            let id = Self.identifier(forStorageKey: storageKey)
+            store = WKWebsiteDataStore(forIdentifier: id)
+        } else {
+            store = .nonPersistent()
+        }
         self.cachedStores[storageKey] = store
         return store
     }

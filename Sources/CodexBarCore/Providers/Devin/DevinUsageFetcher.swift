@@ -174,7 +174,7 @@ public struct DevinUsageFetcher: Sendable {
         timeout: TimeInterval,
         transport: any ProviderHTTPTransport) async throws -> Data
     {
-        let url = self.baseURL.appending(path: "api/\(path)")
+        let url = self.baseURL.codexBarAppendingPath("api/\(path)")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.timeoutInterval = timeout

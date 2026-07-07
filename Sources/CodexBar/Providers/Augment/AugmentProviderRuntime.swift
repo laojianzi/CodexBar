@@ -106,7 +106,7 @@ final class AugmentProviderRuntime: ProviderRuntime {
         guard let keepalive = self.keepalive else {
             context.store.augmentLogger.warning("Augment keepalive not running; starting")
             self.startKeepalive(context: context)
-            try? await Task.sleep(for: .seconds(1))
+            try? await CodexBarCompat.sleep(seconds: 1)
             guard let keepalive = self.keepalive else {
                 context.store.augmentLogger.error("Augment keepalive failed to start")
                 return

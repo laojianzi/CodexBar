@@ -1,7 +1,6 @@
 import Foundation
 
 #if os(macOS)
-import os.lock
 
 public enum ClaudeOAuthRefreshFailureGate {
     public enum BlockStatus: Equatable, Sendable {
@@ -25,7 +24,7 @@ public enum ClaudeOAuthRefreshFailureGate {
         var terminalReason: String?
     }
 
-    private static let lock = OSAllocatedUnfairLock<State>(initialState: State())
+    private static let lock = CodexBarLockedState<State>(initialState: State())
     private static let blockedUntilKey = "claudeOAuthRefreshBackoffBlockedUntilV1" // legacy (migration)
     private static let failureCountKey = "claudeOAuthRefreshBackoffFailureCountV1" // legacy + terminal count
     private static let fingerprintKey = "claudeOAuthRefreshBackoffFingerprintV2"

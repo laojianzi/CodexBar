@@ -209,8 +209,8 @@ public struct OpenAIDashboardFetcher {
         return true
     }
 
-    private nonisolated static func sleepForDashboardPoll(_ duration: Duration) async throws {
-        try? await Task.sleep(for: duration)
+    private nonisolated static func sleepForDashboardPoll(_ seconds: TimeInterval) async throws {
+        try? await CodexBarCompat.sleep(seconds: seconds)
         try Task.checkCancellation()
     }
 
@@ -285,7 +285,7 @@ public struct OpenAIDashboardFetcher {
             }
 
             if scrape.workspacePicker {
-                try await Self.sleepForDashboardPoll(.milliseconds(500))
+                try await Self.sleepForDashboardPoll(0.5)
                 continue
             }
 
@@ -298,7 +298,7 @@ public struct OpenAIDashboardFetcher {
             // The page is a SPA and can land on ChatGPT UI or other routes; keep forcing the usage URL.
             if Self.shouldReloadUsageRoute(scrape) {
                 _ = webView.load(Self.usageURLRequest(url: self.usageURL))
-                try await Self.sleepForDashboardPoll(.milliseconds(500))
+                try await Self.sleepForDashboardPoll(0.5)
                 continue
             }
 
@@ -341,7 +341,7 @@ public struct OpenAIDashboardFetcher {
                         "rows=\(scrape.rows.count)")
                 if scrape.didScrollToCredits {
                     log("scrollIntoView(Credits usage history) requested; waiting…")
-                    try await Self.sleepForDashboardPoll(.milliseconds(600))
+                    try await Self.sleepForDashboardPoll(0.6)
                     continue
                 }
 
@@ -358,7 +358,7 @@ public struct OpenAIDashboardFetcher {
                     creditsHeaderInViewport: scrape.creditsHeaderInViewport,
                     didScrollToCredits: scrape.didScrollToCredits))
                 {
-                    try await Self.sleepForDashboardPoll(.milliseconds(400))
+                    try await Self.sleepForDashboardPoll(0.4)
                     continue
                 }
             }
@@ -370,7 +370,7 @@ public struct OpenAIDashboardFetcher {
                        now: Date(),
                        errorFirstSeenAt: usageBreakdownErrorFirstSeenAt))
                 {
-                    try await Self.sleepForDashboardPoll(.milliseconds(400))
+                    try await Self.sleepForDashboardPoll(0.4)
                     continue
                 }
 
@@ -379,7 +379,7 @@ public struct OpenAIDashboardFetcher {
                 if codeReview != nil, usageBreakdown.isEmpty {
                     let elapsed = Date().timeIntervalSince(codeReviewFirstSeenAt ?? Date())
                     if elapsed < 6 {
-                        try await Self.sleepForDashboardPoll(.milliseconds(400))
+                        try await Self.sleepForDashboardPoll(0.4)
                         continue
                     }
                 }
@@ -398,7 +398,7 @@ public struct OpenAIDashboardFetcher {
                     accountPlan: dashboardData.accountPlan))
             }
 
-            try await Self.sleepForDashboardPoll(.milliseconds(500))
+            try await Self.sleepForDashboardPoll(0.5)
         }
 
         if debugDumpHTML, let html = try? await self.fetchDebugHTML(webView: webView) {
@@ -464,7 +464,7 @@ public struct OpenAIDashboardFetcher {
             lastHref = scrape.href ?? lastHref
 
             if scrape.workspacePicker {
-                try await Self.sleepForDashboardPoll(.milliseconds(500))
+                try await Self.sleepForDashboardPoll(0.5)
                 continue
             }
 
@@ -475,7 +475,7 @@ public struct OpenAIDashboardFetcher {
                 usageRouteSeenAt = nil
                 dashboardSignalSeenAt = nil
                 _ = webView.load(Self.usageURLRequest(url: self.usageURL))
-                try await Self.sleepForDashboardPoll(.milliseconds(500))
+                try await Self.sleepForDashboardPoll(0.5)
                 continue
             }
 
@@ -504,7 +504,7 @@ public struct OpenAIDashboardFetcher {
                 signedInEmail: normalizedEmail,
                 hasDashboardSignal: hasDashboardSignal))
             {
-                try await Self.sleepForDashboardPoll(.milliseconds(400))
+                try await Self.sleepForDashboardPoll(0.4)
                 continue
             }
 

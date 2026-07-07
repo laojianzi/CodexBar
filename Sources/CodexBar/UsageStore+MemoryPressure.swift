@@ -1,3 +1,4 @@
+import CodexBarCore
 import Foundation
 
 @MainActor
@@ -6,8 +7,8 @@ extension UsageStore {
         guard self.memoryPressureReliefTask == nil else { return }
 
         self.memoryPressureReliefTask = Task.detached(priority: .utility) { [weak self] in
-            for delay in [Duration.seconds(2), .seconds(8), .seconds(20)] {
-                try? await Task.sleep(for: delay)
+            for delay in [2.0, 8.0, 20.0] {
+                try? await CodexBarCompat.sleep(seconds: delay)
                 guard !Task.isCancelled else { return }
                 MemoryPressureRelief.releaseFreeMallocPages()
             }

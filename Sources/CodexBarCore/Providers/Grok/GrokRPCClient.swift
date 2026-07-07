@@ -162,7 +162,7 @@ final class GrokRPCClient: @unchecked Sendable {
         try await withThrowingTaskGroup(of: T.self) { group in
             group.addTask { try await body() }
             group.addTask { [weak self] in
-                try await Task.sleep(for: .seconds(seconds))
+                try await CodexBarCompat.sleep(seconds: seconds)
                 self?.terminateProcessForTimeout(method: method)
                 throw GrokRPCError.timeout(method: method)
             }

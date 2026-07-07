@@ -26,14 +26,14 @@ public enum CommandCodeUsageFetcher {
             cookieHeader: cookieHeader,
             transport: transport,
             now: now,
-            subscriptionGrace: .seconds(self.subscriptionGraceSeconds))
+            subscriptionGrace: self.subscriptionGraceSeconds)
     }
 
     static func _fetchUsageForTesting(
         cookieHeader: String,
         transport: any ProviderHTTPTransport,
         now: Date = Date(),
-        subscriptionGrace: Duration) async throws -> CommandCodeUsageSnapshot
+        subscriptionGrace: TimeInterval) async throws -> CommandCodeUsageSnapshot
     {
         try await self.fetchUsage(
             cookieHeader: cookieHeader,
@@ -46,7 +46,7 @@ public enum CommandCodeUsageFetcher {
         cookieHeader: String,
         transport: any ProviderHTTPTransport,
         now: Date,
-        subscriptionGrace: Duration) async throws -> CommandCodeUsageSnapshot
+        subscriptionGrace: TimeInterval) async throws -> CommandCodeUsageSnapshot
     {
         let (credits, subscription, subscriptionEnrichmentUnavailable) = try await self.fetchPayloads(
             cookieHeader: cookieHeader,
@@ -79,7 +79,7 @@ public enum CommandCodeUsageFetcher {
     private static func fetchPayloads(
         cookieHeader: String,
         transport: any ProviderHTTPTransport,
-        subscriptionGrace: Duration) async throws -> (CreditsPayload, SubscriptionPayload?, Bool)
+        subscriptionGrace: TimeInterval) async throws -> (CreditsPayload, SubscriptionPayload?, Bool)
     {
         let subscriptionTask = Task<SubscriptionPayload?, Error> {
             try await self.fetchSubscription(cookieHeader: cookieHeader, transport: transport)

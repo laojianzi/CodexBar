@@ -582,7 +582,7 @@ package final class SpawnedProcessGroup: @unchecked Sendable {
             while processIdentities.contains(where: TTYProcessTreeTerminator.isCurrent(_:)),
                   Date() < killDeadline
             {
-                try? await Task.sleep(for: .milliseconds(20))
+                try? await CodexBarCompat.sleep(seconds: 0.02)
             }
 
             processIdentities.formUnion(self.currentResidualProcessIdentities(includeDescendants: false))
@@ -620,7 +620,7 @@ package final class SpawnedProcessGroup: @unchecked Sendable {
 
         while processIdentities.contains(where: TTYProcessTreeTerminator.isCurrent(_:)) {
             guard Date() < deadline else { break }
-            try? await Task.sleep(for: .milliseconds(20))
+            try? await CodexBarCompat.sleep(seconds: 0.02)
         }
 
         processIdentities.formUnion(self.currentResidualProcessIdentities(includeDescendants: false))
@@ -681,7 +681,7 @@ package final class SpawnedProcessGroup: @unchecked Sendable {
     private func waitForExit(timeout: TimeInterval) async -> Int32? {
         let deadline = Date().addingTimeInterval(max(0, timeout))
         while self.isRunning, Date() < deadline {
-            try? await Task.sleep(for: .milliseconds(20))
+            try? await CodexBarCompat.sleep(seconds: 0.02)
         }
         return self.terminationStatus
     }
@@ -689,7 +689,7 @@ package final class SpawnedProcessGroup: @unchecked Sendable {
     private func waitForTerminationStatus(timeout: TimeInterval) async -> Int32? {
         let deadline = Date().addingTimeInterval(max(0, timeout))
         while self.terminationStatus == nil, Date() < deadline {
-            try? await Task.sleep(for: .milliseconds(20))
+            try? await CodexBarCompat.sleep(seconds: 0.02)
         }
         return self.terminationStatus
     }
@@ -703,7 +703,7 @@ package final class SpawnedProcessGroup: @unchecked Sendable {
             guard processIdentities.contains(where: TTYProcessTreeTerminator.isCurrent(_:)) else {
                 return true
             }
-            try? await Task.sleep(for: .milliseconds(20))
+            try? await CodexBarCompat.sleep(seconds: 0.02)
         }
         return !processIdentities.contains(where: TTYProcessTreeTerminator.isCurrent(_:))
     }

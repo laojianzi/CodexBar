@@ -105,7 +105,7 @@ struct CodebuffUsageFetcherTests {
         let snapshot = try await CodebuffUsageFetcher._fetchUsageForTesting(
             apiKey: "cb-test",
             transport: transport,
-            subscriptionGrace: .milliseconds(20))
+            subscriptionGrace: 0.02)
         let elapsed = startedAt.duration(to: .now)
 
         #expect(snapshot.creditsUsed == 25)

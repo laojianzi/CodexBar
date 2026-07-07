@@ -162,7 +162,7 @@ public struct CrossModelUsageFetcher: Sendable {
         environment: [String: String] = ProcessInfo.processInfo.environment,
         includeOptionalUsage: Bool = true,
         transport: any ProviderHTTPTransport = ProviderHTTPClient.shared,
-        usageJoinGrace: Duration = .seconds(3)) async throws -> CrossModelUsageSnapshot
+        usageJoinGrace: TimeInterval = 3) async throws -> CrossModelUsageSnapshot
     {
         guard !apiKey.isEmpty else {
             throw CrossModelUsageError.invalidCredentials
@@ -269,7 +269,7 @@ public struct CrossModelUsageFetcher: Sendable {
         apiKey: String,
         baseURL: URL,
         transport: any ProviderHTTPTransport,
-        joinGrace: Duration) async throws -> CrossModelUsageResponse?
+        joinGrace: TimeInterval) async throws -> CrossModelUsageResponse?
     {
         let url = baseURL.appendingPathComponent("usage")
         var request = URLRequest(url: url)

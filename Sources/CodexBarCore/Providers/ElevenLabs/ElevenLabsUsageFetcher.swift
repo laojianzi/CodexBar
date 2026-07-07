@@ -243,9 +243,9 @@ public struct ElevenLabsUsageFetcher: Sendable {
         var url = baseURL
         let pathComponents = url.path.split(separator: "/")
         if pathComponents.last == "v1" {
-            url.append(path: "user/subscription")
+            url.appendPathComponent("user/subscription")
         } else {
-            url.append(path: "v1/user/subscription")
+            url.appendPathComponent("v1/user/subscription")
         }
         return url
     }

@@ -414,29 +414,29 @@ struct ClaudeOAuthFetchStrategy: ProviderFetchStrategy {
 
 private final class ClaudeWebFetchDeadlineState: @unchecked Sendable {
     private let lock = NSLock()
-    private var deadline: ContinuousClock.Instant?
+    private var deadline: Date?
 
     func remainingBudget(
-        fullBudget: Duration,
-        now: ContinuousClock.Instant) -> Duration
+        fullBudget: TimeInterval,
+        now: Date) -> TimeInterval
     {
         self.lock.lock()
         defer { self.lock.unlock() }
 
-        let deadline: ContinuousClock.Instant
+        let deadline: Date
         if let existingDeadline = self.deadline {
             deadline = existingDeadline
         } else {
-            deadline = now.advanced(by: fullBudget)
+            deadline = now.addingTimeInterval(fullBudget)
             self.deadline = deadline
         }
-        return max(.zero, now.duration(to: deadline))
+        return max(0, deadline.timeIntervalSince(now))
     }
 }
 
 struct ClaudeWebFetchStrategy: ProviderFetchStrategy {
     typealias UsageLoader = @Sendable (ProviderFetchContext) async throws -> ClaudeUsageSnapshot
-    typealias DeadlineNow = @Sendable () -> ContinuousClock.Instant
+    typealias DeadlineNow = @Sendable () -> Date
 
     #if DEBUG
     @TaskLocal static var availabilityProbeOverrideForTesting:
@@ -454,7 +454,7 @@ struct ClaudeWebFetchStrategy: ProviderFetchStrategy {
     init(
         browserDetection: BrowserDetection,
         usageLoader: UsageLoader? = nil,
-        deadlineNow: @escaping DeadlineNow = { ContinuousClock.now })
+        deadlineNow: @escaping DeadlineNow = Date.init)
     {
         self.browserDetection = browserDetection
         self.usageLoader = usageLoader
@@ -463,13 +463,13 @@ struct ClaudeWebFetchStrategy: ProviderFetchStrategy {
     }
 
     func isAvailable(_ context: ProviderFetchContext) async -> Bool {
-        let appAutoRemainingBudget: Duration?
+        let appAutoRemainingBudget: TimeInterval?
         if context.runtime == .app, context.sourceMode == .auto {
             guard let fullBudget = Self.timeoutDuration(context.webTimeout) else { return false }
             let remainingBudget = self.deadlineState.remainingBudget(
                 fullBudget: fullBudget,
                 now: self.deadlineNow())
-            guard remainingBudget > .zero else { return false }
+            guard remainingBudget > 0 else { return false }
             appAutoRemainingBudget = remainingBudget
         } else {
             appAutoRemainingBudget = nil
@@ -516,7 +516,7 @@ struct ClaudeWebFetchStrategy: ProviderFetchStrategy {
 
     fileprivate static func hasBrowserSessionKey(
         context: ProviderFetchContext,
-        before timeout: Duration) async -> Bool
+        before timeout: TimeInterval) async -> Bool
     {
         let browserDetection = context.browserDetection
         let sourceTask = Task<Bool, Error> {
@@ -551,7 +551,7 @@ struct ClaudeWebFetchStrategy: ProviderFetchStrategy {
         let remainingBudget = self.deadlineState.remainingBudget(
             fullBudget: timeoutDuration,
             now: self.deadlineNow())
-        guard remainingBudget > .zero else {
+        guard remainingBudget > 0 else {
             try Task.checkCancellation()
             throw ClaudeWebFetchStrategyError.timedOut(seconds: timeout)
         }
@@ -585,14 +585,14 @@ struct ClaudeWebFetchStrategy: ProviderFetchStrategy {
         }
     }
 
-    private static func timeoutDuration(_ timeout: TimeInterval) -> Duration? {
+    private static func timeoutDuration(_ timeout: TimeInterval) -> TimeInterval? {
         guard timeout.isFinite,
               timeout >= 0,
               timeout <= TimeInterval(Int64.max)
         else {
             return nil
         }
-        return .seconds(timeout)
+        return timeout
     }
 
     fileprivate static var isSupportedOnCurrentPlatform: Bool {

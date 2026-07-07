@@ -62,8 +62,8 @@ struct SpawnedProcessGroupTests {
         await process.terminateResidualProcesses()
         await process.finish()
 
-        async let stdout = stdoutCapture.finish(timeout: .seconds(1))
-        async let stderr = stderrCapture.finish(timeout: .seconds(1))
+        async let stdout = stdoutCapture.finish(timeout: 1)
+        async let stderr = stderrCapture.finish(timeout: 1)
         let output = await (stdout, stderr)
 
         #expect(process.terminationStatus == 0)

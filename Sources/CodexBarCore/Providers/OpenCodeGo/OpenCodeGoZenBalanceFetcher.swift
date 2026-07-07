@@ -15,7 +15,7 @@ private final class OpenCodeGoZenBalanceTaskRace: @unchecked Sendable {
         self.sourceTask = sourceTask
     }
 
-    func value(timeout: Duration? = nil) async throws -> Double? {
+    func value(timeout: TimeInterval? = nil) async throws -> Double? {
         try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
                 self.lock.lock()
@@ -38,7 +38,7 @@ private final class OpenCodeGoZenBalanceTaskRace: @unchecked Sendable {
                 if let timeout {
                     self.timeoutTask = Task { [weak self] in
                         do {
-                            try await Task.sleep(for: timeout)
+                            try await CodexBarCompat.sleep(seconds: timeout)
                             self?.resolve(.success(nil), cancelSource: true)
                         } catch {
                             // The source completed or the caller canceled the race.
@@ -79,8 +79,8 @@ private final class OpenCodeGoZenBalanceTaskRace: @unchecked Sendable {
 
 extension OpenCodeGoUsageFetcher {
     static let optionalZenBalanceTimeout: TimeInterval = 5
-    static let optionalZenBalanceStartDelay: Duration = .milliseconds(25)
-    static let optionalZenBalanceJoinGrace: Duration = .milliseconds(250)
+    static let optionalZenBalanceStartDelay: TimeInterval = 0.025
+    static let optionalZenBalanceJoinGrace: TimeInterval = 0.25
 
     public static func zenDashboardURL(workspaceID raw: String?) -> URL {
         guard let workspaceID = self.normalizeWorkspaceID(raw),

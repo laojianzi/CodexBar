@@ -557,10 +557,10 @@ public struct KiroStatusProbe: Sendable {
         let creditsPattern = #"\((\d+\.?\d*)\s+of\s+(\d+)\s+covered"#
         if let creditsMatch = stripped.range(of: creditsPattern, options: .regularExpression) {
             let creditsStr = String(stripped[creditsMatch])
-            let numbers = creditsStr.matches(of: /(\d+\.?\d*)/)
+            let numbers = CodexBarCompat.regexCaptureGroups(in: creditsStr, pattern: #"(\d+\.?\d*)"#)
             if numbers.count >= 2 {
-                creditsUsed = Double(String(numbers[0].output.1)) ?? 0
-                creditsTotal = Double(String(numbers[1].output.1)) ?? 50
+                creditsUsed = numbers[0].first.flatMap(Double.init) ?? 0
+                creditsTotal = numbers[1].first.flatMap(Double.init) ?? 50
                 matchedCredits = true
             }
         }
@@ -723,10 +723,10 @@ public struct KiroStatusProbe: Sendable {
         var expiryDays: Int?
         if let bonusMatch = text.range(of: #"Bonus credits:\s*(\d+\.?\d*)/(\d+)"#, options: .regularExpression) {
             let bonusStr = String(text[bonusMatch])
-            let numbers = bonusStr.matches(of: /(\d+\.?\d*)/)
+            let numbers = CodexBarCompat.regexCaptureGroups(in: bonusStr, pattern: #"(\d+\.?\d*)"#)
             if numbers.count >= 2 {
-                used = Double(String(numbers[0].output.1))
-                total = Double(String(numbers[1].output.1))
+                used = numbers[0].first.flatMap(Double.init)
+                total = numbers[1].first.flatMap(Double.init)
             }
         }
         if let expiryMatch = text.range(of: #"expires in (\d+) days?"#, options: .regularExpression) {
